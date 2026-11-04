@@ -46,7 +46,7 @@ export function Toaster() {
           role="status"
           className={cx(
             "pointer-events-auto relative left-1/2 flex animate-toast items-start gap-2.5 rounded-xl px-4 py-3 text-sm font-medium whitespace-pre-line shadow-[var(--shadow-pop)]",
-            t.tone === "ok" ? "bg-brand-900 text-white" : "bg-danger text-white",
+            t.tone === "ok" ? "bg-gradient-to-r from-brand-900 to-brand-700 text-white ring-1 ring-white/10" : "bg-gradient-to-r from-rose-600 to-danger text-white",
           )}
         >
           <Icon name={t.tone === "ok" ? "check" : "alert"} className="mt-px size-[18px] shrink-0 text-gold-400" />
@@ -88,9 +88,10 @@ export function Modal({ open, onClose, title, children, footer, wide }: { open: 
           wide ? "sm:max-w-3xl" : "sm:max-w-lg",
         )}
       >
-        <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
-          <h2 className="text-base font-semibold text-brand-900">{title}</h2>
-          <button onClick={onClose} aria-label="Закрыть" className="grid size-9 place-items-center rounded-lg text-muted hover:bg-brand-50">
+        <div className="relative flex items-center justify-between gap-3 overflow-hidden bg-gradient-to-br from-brand-950 via-brand-900 to-brand-700 px-5 py-4 text-white">
+          <div className="pointer-events-none absolute -right-10 -top-14 size-36 rounded-full border-[16px] border-gold-500/20" />
+          <h2 className="relative text-base font-bold">{title}</h2>
+          <button onClick={onClose} aria-label="Закрыть" className="relative grid size-9 place-items-center rounded-xl bg-white/10 text-white transition hover:rotate-90 hover:bg-white/20">
             <Icon name="close" className="size-[18px]" />
           </button>
         </div>

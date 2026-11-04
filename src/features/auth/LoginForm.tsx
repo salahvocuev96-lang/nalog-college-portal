@@ -42,13 +42,15 @@ export function LoginForm({ demo }: { demo: boolean }) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-md animate-enter">
-      <div className="mb-8 flex flex-col items-center text-center lg:hidden">
-        <Crest className="size-24" />
-        <p className="mt-3 text-xl font-bold text-brand-900">Налоговый колледж</p>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-600">Education portal</p>
+    <div className="relative mx-auto w-full max-w-md animate-enter">
+      <div className="relative -mx-4 mb-8 flex flex-col items-center overflow-hidden rounded-b-[2rem] bg-gradient-to-br from-brand-950 via-brand-900 to-brand-700 px-4 pb-8 pt-10 text-center text-white sm:-mx-10 lg:hidden">
+        <div className="dots-pattern pointer-events-none absolute inset-0 opacity-50" />
+        <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full border-[20px] border-gold-500/20" />
+        <span className="relative grid size-24 place-items-center rounded-3xl bg-white p-2 shadow-[0_12px_30px_-10px_rgb(229_169_26/0.7)] ring-4 ring-gold-500/30"><Crest className="size-20" /></span>
+        <p className="relative mt-4 text-xl font-extrabold">Налоговый колледж</p>
+        <p className="relative text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-400">Education portal</p>
       </div>
-      <h2 className="text-2xl font-bold text-brand-900 md:text-3xl">Вход в&nbsp;личный кабинет</h2>
+      <h2 className="text-2xl font-extrabold tracking-tight text-brand-900 md:text-3xl">Вход в&nbsp;личный кабинет</h2>
       <p className="mt-2 text-sm text-muted">Логин и&nbsp;временный пароль выдаёт учебная часть колледжа</p>
 
       <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
@@ -79,7 +81,7 @@ export function LoginForm({ demo }: { demo: boolean }) {
       </form>
 
       {demo && (
-        <div className="mt-8 rounded-2xl border border-dashed border-gold-500/60 bg-gold-50/50 p-4">
+        <div className="mt-8 rounded-2xl border border-gold-200 bg-gradient-to-br from-gold-50 to-white p-4 shadow-sm">
           <p className="text-sm font-semibold text-brand-900">Демонстрационный вход</p>
           <p className="mt-0.5 text-xs text-muted">Открыть кабинет без пароля. В рабочей версии этот блок отключается</p>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -88,9 +90,9 @@ export function LoginForm({ demo }: { demo: boolean }) {
                 key={d.login}
                 disabled={!!busy}
                 onClick={async () => { setBusy(d.login); setError(""); done(await demoLogin(d.login)); }}
-                className="group flex flex-col items-start rounded-xl border border-line bg-white p-3 text-left transition hover:-translate-y-0.5 hover:border-gold-500 hover:shadow-card disabled:opacity-60"
+                className="group flex flex-col items-start rounded-xl border border-line bg-white p-3 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-gold-500 hover:shadow-[0_12px_24px_-12px_rgb(10_33_72/0.35)] active:scale-[0.97] disabled:opacity-60"
               >
-                <span className="grid size-8 place-items-center rounded-lg bg-brand-50 text-brand-700 transition group-hover:bg-brand-900 group-hover:text-gold-400">
+                <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-brand-600 to-brand-900 text-white shadow-sm transition-transform duration-200 group-hover:scale-110 group-hover:text-gold-400">
                   <Icon name={d.icon} className="size-[18px]" />
                 </span>
                 <span className="mt-2 text-[13px] font-semibold text-brand-900">{busy === d.login ? "Входим…" : d.title}</span>

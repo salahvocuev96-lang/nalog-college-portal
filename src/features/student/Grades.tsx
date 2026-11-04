@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useViewer } from "../useViewer";
-import { AvgBadge, Badge, Card, Empty, GradeChip, PageHeader, Segmented, Select } from "@/components/ui";
+import { AvgBadge, Badge, Card, Empty, GradeChip, PageHeader, Segmented, Select, MiniStat, cx } from "@/components/ui";
 import { Modal } from "@/components/feedback";
 import { formatShort, monthPeriod, MONTHS, semesterByNumber, yearPeriod, academicYear, toISO, type Period } from "@/lib/dates";
 import { average, finalGrade, gradesOf } from "@/lib/stats";
@@ -61,24 +61,28 @@ export function StudentGrades() {
           </div>
         }
       />
-      <div className="mb-5 grid gap-4 sm:grid-cols-3">
-        <Card className="flex items-center justify-between p-5"><span className="text-sm text-muted">{period.label}</span><AvgBadge value={total} className="h-9 min-w-16 text-base" /></Card>
-        <Card className="flex items-center justify-between p-5"><span className="text-sm text-muted">За учебный год</span><AvgBadge value={yearAvg} className="h-9 min-w-16 text-base" /></Card>
-        <Card className="flex items-center justify-between p-5"><span className="text-sm text-muted">Оценок за период</span><span className="text-xl font-bold text-brand-900">{rows.reduce((a, r) => a + r.list.length, 0)}</span></Card>
+      <div className="mb-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <MiniStat icon="star" tone="gold" label={`Средний · ${period.label}`} value={total === null ? "-" : total.toFixed(2).replace(".", ",")} />
+        <MiniStat icon="chart" label="За учебный год" value={yearAvg === null ? "-" : yearAvg.toFixed(2).replace(".", ",")} />
+        <MiniStat icon="check" tone="green" label="Оценок за период" value={rows.reduce((a, r) => a + r.list.length, 0)} />
+        <MiniStat icon="book" label="Предметов" value={rows.length} />
       </div>
       <Card>
         {rows.length === 0 ? <Empty title="Нет предметов" /> : (
-          <ul className="divide-y divide-line">
-            <li className="hidden grid-cols-[minmax(0,260px)_1fr_80px_70px] gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-muted md:grid">
+          <ul className="divide-y divide-line/70">
+            <li className="hidden grid-cols-[minmax(0,260px)_1fr_80px_70px] gap-4 rounded-t-[var(--radius-card)] bg-gradient-to-b from-brand-50/80 to-brand-50/30 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-brand-800/70 md:grid">
               <span>Предмет</span><span>Оценки (нажмите, чтобы открыть)</span><span className="text-right">Средний</span><span className="text-right">{kind === "year" ? "Годовая" : "Итог"}</span>
             </li>
             {rows.map((r) => (
-              <li key={r.subject.id} className="grid grid-cols-[1fr_auto_auto] items-center gap-x-4 gap-y-2 px-5 py-3.5 md:grid-cols-[minmax(0,260px)_1fr_80px_70px]">
-                <p className="text-sm font-medium text-ink">{r.subject.name}</p>
+              <li key={r.subject.id} className="grid grid-cols-[1fr_auto_auto] items-center gap-x-4 gap-y-2 px-4 py-3.5 transition-colors hover:bg-gold-50/40 sm:px-5 md:grid-cols-[minmax(0,260px)_1fr_80px_70px]">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-ink">{r.subject.name}</p>
+                  <div className="mt-1.5 h-1 w-full max-w-40 overflow-hidden rounded-full bg-brand-50"><div className={cx("bar-x h-full rounded-full", r.avg === null ? "" : r.avg >= 4.5 ? "bg-emerald-500" : r.avg >= 3.5 ? "bg-brand-600" : r.avg >= 2.5 ? "bg-gold-500" : "bg-rose-500")} style={{ width: `${((r.avg ?? 0) / 5) * 100}%` }} /></div>
+                </div>
                 <div className="col-span-3 row-start-2 flex flex-wrap gap-1.5 md:col-span-1 md:row-start-auto">
                   {r.list.length === 0 && <span className="text-xs text-muted">Нет оценок</span>}
                   {r.list.map((g) => (
-                    <button key={g.date} onClick={() => setOpened(g)} className="relative transition hover:-translate-y-0.5">
+                    <button key={g.date} onClick={() => setOpened(g)} className="relative transition duration-200 hover:-translate-y-0.5 hover:scale-110 active:scale-95">
                       <GradeChip value={g.value} size="sm" title={formatShort(g.date)} />
                       {changed.has(key(g.studentId, g.subjectId, g.date)) && <span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-gold-500 ring-2 ring-white" />}
                     </button>
@@ -86,7 +90,7 @@ export function StudentGrades() {
                 </div>
                 <div className="col-start-2 row-start-1 text-right md:col-start-auto md:row-start-auto"><AvgBadge value={r.avg} /></div>
                 <div className="col-start-3 row-start-1 text-right md:col-start-auto md:row-start-auto">
-                  {kind === "month" ? <span className="text-xs text-muted">—</span> : finalGrade(r.avg, rule) ? <span className="inline-grid size-8 place-items-center rounded-lg bg-brand-900 text-sm font-bold text-gold-400" title="Расчётная итоговая оценка">{finalGrade(r.avg, rule)}</span> : <span className="text-xs text-muted">—</span>}
+                  {kind === "month" ? <span className="text-xs text-muted">—</span> : finalGrade(r.avg, rule) ? <span className="inline-grid size-8 place-items-center rounded-lg bg-gradient-to-br from-brand-700 to-brand-950 text-sm font-bold text-gold-400 shadow-sm" title="Расчётная итоговая оценка">{finalGrade(r.avg, rule)}</span> : <span className="text-xs text-muted">—</span>}
                 </div>
               </li>
             ))}

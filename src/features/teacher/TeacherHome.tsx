@@ -68,10 +68,10 @@ export function TeacherHome() {
             <ul className="divide-y divide-line">
               {lessons.map((l) => (
                 <li key={l.slot + l.groupId}>
-                  <Link href={day === now ? `/journal/?group=${l.groupId}&subject=${l.subjectId}&date=${day}` : "/schedule/"} className="flex items-center gap-4 px-5 py-3.5 transition hover:bg-page">
-                    <div className="w-[78px] shrink-0"><p className="text-[13px] font-bold text-brand-900">{l.slot} пара</p><p className="text-xs text-muted">{l.time}</p></div>
-                    <div className="min-w-0 flex-1"><p className="truncate font-medium">{l.subject}</p><p className="text-xs text-muted">Группа {l.group}{l.room && ` · ауд. ${l.room}`}</p></div>
-                    <Icon name="journal" className="size-[18px] text-muted" />
+                  <Link href={day === now ? `/journal/?group=${l.groupId}&subject=${l.subjectId}&date=${day}` : "/schedule/"} className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-gold-50/50 sm:gap-4 sm:px-5">
+                    <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-700 to-brand-900 text-sm font-extrabold text-white shadow-sm">{l.slot}</span>
+                    <div className="min-w-0 flex-1"><p className="truncate font-semibold text-brand-900">{l.subject}</p><p className="text-xs text-muted">Группа {l.group}{l.room && ` · ауд. ${l.room}`} · {l.time}</p></div>
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700 transition-all group-hover:bg-gold-500 group-hover:text-brand-950"><Icon name="journal" className="size-[18px]" /></span>
                   </Link>
                 </li>
               ))}

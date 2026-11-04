@@ -40,7 +40,7 @@ export function DataTable<T>({ rows, columns, rowKey, empty = "Ничего не
       <div className="hidden md:block scroll-x">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-line text-left text-[11px] uppercase tracking-wide text-muted">
+            <tr className="border-b border-line bg-gradient-to-b from-brand-50/80 to-brand-50/30 text-left text-[11px] uppercase tracking-wider text-brand-800/70">
               {columns.map((c) => (
                 <th key={c.key} className={cx("px-4 py-3 font-semibold first:pl-5", c.className)}>
                   {c.sort ? (
@@ -53,20 +53,20 @@ export function DataTable<T>({ rows, columns, rowKey, empty = "Ничего не
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-line">
+          <tbody className="divide-y divide-line/70">
             {shown.map((r) => (
-              <tr key={rowKey(r)} onClick={onRowClick && (() => onRowClick(r))} className={cx("transition-colors hover:bg-page/80", onRowClick && "cursor-pointer")}>
+              <tr key={rowKey(r)} onClick={onRowClick && (() => onRowClick(r))} className={cx("transition-colors duration-150 odd:bg-white even:bg-page/40 hover:bg-gold-50/50", onRowClick && "cursor-pointer")}>
                 {columns.map((c) => <td key={c.key} className={cx("px-4 py-3 first:pl-5", c.className)}>{c.render(r)}</td>)}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <ul className="divide-y divide-line md:hidden">
+      <ul className="space-y-2 p-3 md:hidden">
         {shown.map((r) => (
-          <li key={rowKey(r)} onClick={onRowClick && (() => onRowClick(r))} className={cx("px-4 py-3.5", onRowClick && "active:bg-page")}>
+          <li key={rowKey(r)} onClick={onRowClick && (() => onRowClick(r))} className={cx("rounded-2xl border border-line/80 bg-white px-4 py-3.5 shadow-sm transition", onRowClick && "active:scale-[0.99] active:bg-page")}>
             <div className="text-sm font-semibold text-brand-900">{primary.render(r)}</div>
-            <dl className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+            <dl className="mt-2 grid border-t border-line/60 pt-2 grid-cols-2 gap-x-3 gap-y-1 text-xs">
               {columns.filter((c) => c !== primary).map((c) => (
                 <div key={c.key} className="min-w-0"><dt className="text-muted">{c.label}</dt><dd className="truncate text-ink">{c.render(r)}</dd></div>
               ))}
@@ -75,7 +75,7 @@ export function DataTable<T>({ rows, columns, rowKey, empty = "Ничего не
         ))}
       </ul>
       {sorted.length > limit && (
-        <button onClick={() => setLimit((l) => l + pageSize)} className="w-full border-t border-line py-3 text-sm font-semibold text-brand-700 hover:bg-page">
+        <button onClick={() => setLimit((l) => l + pageSize)} className="w-full border-t border-line py-3 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50">
           Показать ещё ({sorted.length - limit})
         </button>
       )}

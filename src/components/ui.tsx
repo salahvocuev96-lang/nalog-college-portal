@@ -1,7 +1,9 @@
 // Базовые UI-компоненты дизайн-системы портала
 "use client";
 import type { ButtonHTMLAttributes, CSSProperties, ReactNode, SelectHTMLAttributes } from "react";
+import { usePathname } from "next/navigation";
 import { Icon, type IconName } from "./icons";
+import { NAV } from "@/lib/nav";
 
 export const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(" ");
 
@@ -63,14 +65,46 @@ export function MoreLink({ children }: { children: ReactNode }) {
   );
 }
 
-export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: ReactNode; action?: ReactNode }) {
+function pageIcon(path: string): IconName {
+  for (const items of Object.values(NAV)) for (const it of items) if (path.startsWith(it.href) && it.href !== "/home/") return it.icon;
+  return "home";
+}
+
+/** Шапка раздела: фирменный тёмный баннер с иконкой раздела */
+export function PageHeader({ title, subtitle, action, icon }: { title: string; subtitle?: ReactNode; action?: ReactNode; icon?: IconName }) {
+  const path = usePathname() ?? "";
+  const ic = icon ?? pageIcon(path);
   return (
-    <div className="mb-6 flex animate-enter flex-wrap items-end justify-between gap-4">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-brand-900 md:text-[28px]">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
+    <div className="relative mb-5 animate-enter overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-brand-950 via-brand-900 to-brand-700 p-4 text-white sm:mb-6 sm:p-6" style={{ boxShadow: "0 16px 40px -18px rgb(10 33 72 / 0.6)" }}>
+      <div className="dots-pattern pointer-events-none absolute inset-0 opacity-50 [mask-image:linear-gradient(100deg,transparent_40%,black)]" />
+      <div className="pointer-events-none absolute -right-14 -top-20 size-56 rounded-full border-[24px] border-gold-500/20" />
+      <div className="pointer-events-none absolute -bottom-20 left-1/3 size-48 rounded-full bg-brand-500/25 blur-3xl" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold-400/60 to-transparent" />
+      <div className="relative flex flex-wrap items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+          <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-gold-400 to-gold-600 text-brand-950 shadow-[0_8px_20px_-8px_rgb(229_169_26/0.9)] sm:size-14">
+            <Icon name={ic} className="size-5 sm:size-6" />
+          </span>
+          <div className="min-w-0">
+            <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl md:text-[28px]">{title}</h1>
+            {subtitle && <p className="mt-0.5 text-[13px] text-white/65 sm:text-sm">{subtitle}</p>}
+          </div>
+        </div>
+        {action && <div className="flex w-full min-w-0 flex-wrap items-end gap-2 rounded-2xl bg-white/95 p-2 text-ink shadow-lg ring-1 ring-white/20 sm:w-auto">{action}</div>}
       </div>
-      {action}
+    </div>
+  );
+}
+
+/** Плитка с иконкой и числом для верхней части разделов */
+export function MiniStat({ icon, label, value, tone = "brand" }: { icon: IconName; label: string; value: ReactNode; tone?: keyof typeof statTones }) {
+  return (
+    <div className="lift flex min-w-0 items-center gap-3 rounded-2xl border border-line/80 bg-white p-3 shadow-card sm:p-4">
+      <span className={cx("grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br", statTones[tone].icon)}><Icon name={icon} className="size-[18px]" /></span>
+      <div className="min-w-0">
+        <p className="text-xl font-extrabold leading-none tabular-nums text-brand-900 sm:text-2xl">{value}</p>
+        <p className="mt-1 truncate text-xs text-muted">{label}</p>
+      </div>
     </div>
   );
 }
@@ -97,9 +131,9 @@ export function Button({ variant = "brand", className, children, ...rest }: Butt
 export function Select({ label, className, children, ...rest }: SelectHTMLAttributes<HTMLSelectElement> & { label?: string }) {
   return (
     <label className={cx("flex min-w-0 flex-col gap-1.5", className)}>
-      {label && <span className="text-xs font-medium uppercase tracking-wide text-muted">{label}</span>}
+      {label && <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">{label}</span>}
       <select
-        className="h-10 w-full min-w-0 rounded-xl border border-line bg-white px-3 text-sm text-ink outline-none transition focus:border-brand-700 focus:ring-2 focus:ring-brand-100"
+        className="h-10 w-full min-w-0 cursor-pointer rounded-xl border border-line bg-white px-3 text-sm font-medium text-ink shadow-[0_1px_2px_rgb(10_33_72/0.05)] outline-none transition hover:border-brand-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
         {...rest}
       >
         {children}
@@ -111,7 +145,7 @@ export function Select({ label, className, children, ...rest }: SelectHTMLAttrib
 export function Field({ label, hint, className, children }: { label: string; hint?: ReactNode; className?: string; children: ReactNode }) {
   return (
     <label className={cx("flex min-w-0 flex-col gap-1.5", className)}>
-      <span className="text-xs font-medium uppercase tracking-wide text-muted">{label}</span>
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">{label}</span>
       {children}
       {hint && <span className="text-xs text-muted">{hint}</span>}
     </label>
@@ -127,7 +161,7 @@ export function Badge({ tone = "brand", children, className }: { tone?: "brand" 
     gray: "bg-slate-100 text-slate-600 ring-slate-200",
     sky: "bg-sky-50 text-sky-700 ring-sky-100",
   };
-  return <span className={cx("inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1", tones[tone], className)}>{children}</span>;
+  return <span className={cx("inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1", tones[tone], className)}><span className="size-1.5 shrink-0 rounded-full bg-current opacity-70" />{children}</span>;
 }
 
 /** Поле поиска с иконкой */
@@ -141,7 +175,7 @@ export function SearchInput({ value, onChange, placeholder = "Поиск", class
 }
 
 export const inputCls =
-  "h-10 w-full rounded-xl border border-line bg-white px-3 text-sm outline-none transition focus:border-brand-700 focus:ring-2 focus:ring-brand-100";
+  "h-10 w-full rounded-xl border border-line bg-white px-3 text-sm shadow-[0_1px_2px_rgb(10_33_72/0.05)] outline-none transition placeholder:text-muted/70 hover:border-brand-200 focus:border-brand-600 focus:ring-4 focus:ring-brand-100";
 
 const statTones = {
   brand: { icon: "from-brand-500 to-brand-800 text-white shadow-[0_8px_18px_-8px_rgb(29_65_150/0.8)]", bar: "from-brand-500 to-brand-700", glow: "bg-brand-500/10" },
@@ -255,13 +289,13 @@ export function Empty({ icon = "book", title, text }: { icon?: IconName; title: 
 
 export function Segmented<T extends string>({ value, onChange, options }: { value: T; onChange: (v: T) => void; options: { value: T; label: string }[] }) {
   return (
-    <div className="inline-flex max-w-full overflow-x-auto rounded-xl bg-brand-50 p-1 [scrollbar-width:none]">
+    <div className="inline-flex max-w-full overflow-x-auto rounded-xl bg-brand-50 p-1 ring-1 ring-brand-100 [scrollbar-width:none]">
       {options.map((o) => (
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
           aria-pressed={value === o.value}
-          className={cx("h-8 whitespace-nowrap rounded-lg px-3 text-[13px] font-semibold transition-all duration-200 active:scale-95", value === o.value ? "bg-white text-brand-900 shadow-[0_2px_8px_-2px_rgb(10_33_72/0.18)]" : "text-muted hover:text-brand-800")}
+          className={cx("h-8 whitespace-nowrap rounded-lg px-3 text-[13px] font-semibold transition-all duration-200 active:scale-95", value === o.value ? "bg-gradient-to-b from-brand-700 to-brand-900 text-white shadow-[0_4px_10px_-4px_rgb(18_48_106/0.7)]" : "text-muted hover:text-brand-800")}
         >
           {o.label}
         </button>
