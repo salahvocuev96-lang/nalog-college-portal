@@ -47,23 +47,25 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh lg:pl-72">
       {/* Сайдбар для компьютера */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 flex-col bg-brand-900 text-white lg:flex">
-        <div className="pointer-events-none absolute -bottom-24 -left-24 size-72 rounded-full border-[26px] border-gold-500/[0.07]" />
-        <div className="flex items-center gap-3 border-b border-white/10 px-6 py-5">
-          <span className="grid size-12 place-items-center rounded-xl bg-white p-1"><Crest className="size-10" /></span>
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 flex-col overflow-hidden bg-gradient-to-b from-brand-900 via-brand-900 to-brand-950 text-white lg:flex">
+        <div className="dots-pattern pointer-events-none absolute inset-0 opacity-40 [mask-image:linear-gradient(to_bottom,transparent,black_70%)]" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 size-72 rounded-full border-[26px] border-gold-500/[0.09]" />
+        <div className="pointer-events-none absolute -right-20 top-24 size-48 rounded-full bg-brand-500/20 blur-3xl" />
+        <div className="relative flex items-center gap-3 border-b border-white/10 px-6 py-5">
+          <span className="grid size-12 place-items-center rounded-xl bg-white p-1 shadow-[0_6px_18px_-6px_rgb(229_169_26/0.6)] ring-2 ring-gold-500/40"><Crest className="size-10" /></span>
           <div className="leading-tight">
             <p className="text-[15px] font-bold tracking-wide">Налоговый колледж</p>
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-400">Education portal</p>
           </div>
         </div>
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+        <nav className="relative flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {items.map((it) => (
             <Link
               key={it.href}
               href={it.href}
               className={cx(
                 "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium transition-all duration-200",
-                isActive(it.href) ? "bg-white/10 text-white shadow-[inset_3px_0_0_var(--color-gold-500)]" : "text-white/70 hover:bg-white/5 hover:text-white",
+                isActive(it.href) ? "bg-gradient-to-r from-white/15 to-white/[0.03] text-white shadow-[inset_3px_0_0_var(--color-gold-500)]" : "text-white/65 hover:translate-x-0.5 hover:bg-white/[0.06] hover:text-white",
               )}
             >
               <Icon name={it.icon} className={cx("size-[19px] transition-colors", isActive(it.href) ? "text-gold-400" : "")} />
@@ -72,8 +74,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
-        <div className="border-t border-white/10 p-4">
-          <div className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
+        <div className="relative border-t border-white/10 p-4">
+          <div className="flex items-center gap-3 rounded-xl bg-white/[0.07] p-3 ring-1 ring-white/10">
             <Avatar name={session.name} className="bg-gold-500 text-brand-950" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold">{session.name}</p>
@@ -87,7 +89,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Шапка */}
-      <header className="sticky top-0 z-20 border-b border-line bg-white/95 backdrop-blur shadow-sm">
+      <header className="sticky top-0 z-20 border-b border-line/70 bg-white/80 shadow-[0_1px_12px_-4px_rgb(10_33_72/0.12)] backdrop-blur-xl">
         <div className="flex h-16 items-center gap-3 px-4 md:px-8">
           <Link href="/home/" className="flex items-center gap-2.5 lg:hidden">
             <Crest className="size-9" />
@@ -105,11 +107,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       <Toaster />
 
       {/* Нижнее меню для телефона и планшета */}
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 backdrop-blur lg:hidden">
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-line/70 bg-white/85 shadow-[0_-8px_30px_-12px_rgb(10_33_72/0.25)] backdrop-blur-xl lg:hidden">
         <div className="grid grid-cols-5">
           {mobileMain.map((it) => (
             <Link key={it.href} href={it.href} className={cx("flex min-h-[60px] flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors", isActive(it.href) ? "text-brand-800" : "text-muted")}>
-              <span className={cx("relative grid h-8 w-12 place-items-center rounded-2xl transition-all duration-200", isActive(it.href) ? "bg-gradient-to-b from-brand-700 to-brand-900 shadow-sm" : "")}>
+              <span className={cx("relative grid h-8 w-12 place-items-center rounded-2xl transition-all duration-200", isActive(it.href) ? "-translate-y-0.5 bg-gradient-to-b from-brand-600 to-brand-900 shadow-[0_6px_14px_-6px_rgb(18_48_106/0.8)]" : "active:scale-90")}>
                 <Icon name={it.icon} className={cx("size-[20px] transition-colors", isActive(it.href) ? "text-white" : "")} />
                 <NavCounter href={it.href} />
               </span>
@@ -123,18 +125,19 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </nav>
       {more && (
-        <div className="fixed inset-0 z-20 animate-fade bg-brand-950/40 lg:hidden" onClick={() => setMore(false)}>
-          <div className="safe-bottom absolute inset-x-0 bottom-[61px] max-h-[75dvh] animate-sheet overflow-y-auto rounded-t-3xl bg-white p-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-3 flex items-center gap-3 rounded-2xl bg-brand-50 p-3">
-              <Avatar name={session.name} />
+        <div className="fixed inset-0 z-20 animate-fade bg-brand-950/45 backdrop-blur-[2px] lg:hidden" onClick={() => setMore(false)}>
+          <div className="safe-bottom absolute inset-x-0 bottom-[61px] max-h-[75dvh] animate-sheet overflow-y-auto rounded-t-3xl bg-white p-4 pt-3 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-line" />
+            <div className="mb-3 flex items-center gap-3 rounded-2xl bg-gradient-to-br from-brand-900 to-brand-700 p-3 text-white">
+              <Avatar name={session.name} className="bg-gold-500 text-brand-950" />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-brand-900">{session.name}</p>
-                <p className="text-xs text-muted">{ROLE_LABEL[session.role]}</p>
+                <p className="truncate text-sm font-semibold">{session.name}</p>
+                <p className="text-xs text-white/60">{ROLE_LABEL[session.role]}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {mobileMore.map((it) => (
-                <Link key={it.href} href={it.href} className={cx("flex items-center gap-2.5 rounded-xl border border-line px-3 py-3 text-sm font-medium", isActive(it.href) ? "border-gold-500 bg-gold-50 text-brand-900" : "text-ink")}>
+                <Link key={it.href} href={it.href} className={cx("flex items-center gap-2.5 rounded-xl border border-line px-3 py-3 text-sm font-medium transition-all active:scale-[0.97]", isActive(it.href) ? "border-gold-500 bg-gold-50 text-brand-900" : "text-ink")}>
                   <Icon name={it.icon} className="size-5 text-gold-600" />
                   {it.label}
                 </Link>

@@ -61,6 +61,13 @@
 /* Базовые стили в слое base, чтобы утилиты Tailwind (text-white и т.п.) их переопределяли */
 @layer base {
 html, body { background: var(--color-page); color: var(--color-ink); }
+body {
+  background:
+    radial-gradient(1200px 500px at 85% -10%, rgb(74 114 212 / 0.10), transparent 60%),
+    radial-gradient(900px 400px at -10% 10%, rgb(229 169 26 / 0.07), transparent 60%),
+    var(--color-page);
+  background-attachment: fixed;
+}
 body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; font-feature-settings: "tnum" 0; }
 a { text-decoration: none; color: inherit; }
 h1, h2, h3 { text-wrap: balance; }
@@ -82,6 +89,28 @@ button:disabled { cursor: not-allowed; }
   animation: shimmer 1.3s linear infinite;
   border-radius: 0.6rem;
 }
+
+/* Карточки с подъёмом при наведении */
+.lift { transition: transform 220ms var(--ease-out), box-shadow 220ms var(--ease-out), border-color 220ms; }
+@media (hover: hover) {
+  .lift:hover { transform: translateY(-2px); box-shadow: 0 2px 6px rgb(10 33 72 / 0.06), 0 18px 40px -12px rgb(10 33 72 / 0.22); }
+}
+
+/* Точечный узор для тёмных блоков */
+.dots-pattern {
+  background-image: radial-gradient(rgb(255 255 255 / 0.09) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* Анимация роста полос и колец графиков */
+@keyframes grow-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes grow-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes ring { from { stroke-dashoffset: var(--ring-len); } }
+@keyframes pulse-dot { 0%, 100% { box-shadow: 0 0 0 0 rgb(229 169 26 / 0.55); } 50% { box-shadow: 0 0 0 6px rgb(229 169 26 / 0); } }
+.bar-x { transform-origin: left; animation: grow-x 900ms var(--ease-out) both; }
+.bar-y { transform-origin: bottom; animation: grow-y 800ms var(--ease-out) both; }
+.ring-anim { animation: ring 1100ms var(--ease-out) both; }
+.pulse-dot { animation: pulse-dot 1.8s ease-in-out infinite; }
 
 .scroll-x { overflow-x: auto; scrollbar-width: thin; }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
