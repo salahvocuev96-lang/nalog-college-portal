@@ -65,14 +65,14 @@ export function StudentHome() {
               {data.lessons.map((l) => {
                 const g = db.grades[key(student.id, l.subjectId, data.day)];
                 return (
-                  <li key={l.slot} className="flex items-center gap-4 px-5 py-3.5">
-                    <div className="w-[78px] shrink-0">
-                      <p className="text-[13px] font-bold text-brand-900">{l.slot} пара</p>
-                      <p className="text-xs text-muted">{l.time}</p>
+                  <li key={l.slot} className="flex items-center gap-4 px-5 py-3.5 hover:bg-brand-50/40 transition-colors">
+                    <div className="flex shrink-0 flex-col items-center gap-1">
+                      <span className="grid size-8 place-items-center rounded-full bg-brand-800 text-[12px] font-bold text-white">{l.slot}</span>
+                      <p className="text-[11px] text-muted leading-tight text-center">{l.time.split("–")[0]}<br />{l.time.split("–")[1]}</p>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium text-ink">{l.subject}</p>
-                      <p className="truncate text-xs text-muted">{l.teacher}{l.room && ` · каб. ${l.room}`}</p>
+                      <p className="truncate font-semibold text-brand-900">{l.subject}</p>
+                      <p className="truncate text-xs text-muted mt-0.5">{l.teacher}{l.room && ` · каб. ${l.room}`}</p>
                     </div>
                     {g && <GradeChip value={g.value} size="sm" />}
                   </li>
@@ -89,10 +89,10 @@ export function StudentHome() {
           ) : (
             <ul className="divide-y divide-line">
               {data.recent.map((g) => (
-                <li key={g.subjectId + g.date} className="flex items-center gap-3 px-5 py-3">
+                <li key={g.subjectId + g.date} className="flex items-center gap-3 px-5 py-3 hover:bg-brand-50/40 transition-colors">
                   <GradeChip value={g.value} size="sm" />
-                  <p className="min-w-0 flex-1 truncate text-sm">{subjectName(db, g.subjectId)}</p>
-                  <span className="text-xs text-muted">{formatShort(g.date)}</span>
+                  <p className="min-w-0 flex-1 truncate text-sm font-medium text-ink">{subjectName(db, g.subjectId)}</p>
+                  <span className="shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-600">{formatShort(g.date)}</span>
                 </li>
               ))}
             </ul>
@@ -108,13 +108,16 @@ export function StudentHome() {
         ) : (
           <ul className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
             {data.hw.slice(0, 4).map((h) => (
-              <li key={h.id} className="min-w-0 rounded-xl border border-line p-4">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="truncate text-sm font-semibold text-brand-900">{subjectName(db, h.subjectId)}</p>
-                  <span className="shrink-0 rounded-full bg-gold-50 px-2.5 py-0.5 text-xs font-semibold text-gold-600">до {formatShort(h.due)}</span>
+              <li key={h.id} className="min-w-0 overflow-hidden rounded-xl border border-line bg-white shadow-sm hover:shadow-md hover:border-brand-200 transition-all duration-200">
+                <div className="h-1.5 w-full bg-gradient-to-r from-gold-400 to-gold-600" />
+                <div className="p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="truncate text-[13px] font-bold text-brand-700 uppercase tracking-wide">{subjectName(db, h.subjectId)}</p>
+                    <span className="shrink-0 rounded-full bg-gold-50 px-2.5 py-0.5 text-xs font-semibold text-gold-700 ring-1 ring-gold-200">до {formatShort(h.due)}</span>
+                  </div>
+                  <p className="mt-2 text-sm font-semibold text-ink">{h.title}</p>
+                  <p className="mt-1 line-clamp-2 text-xs text-muted">{h.text}</p>
                 </div>
-                <p className="mt-1.5 text-sm font-medium text-ink">{h.title}</p>
-                <p className="mt-0.5 line-clamp-2 text-sm text-muted">{h.text}</p>
               </li>
             ))}
           </ul>

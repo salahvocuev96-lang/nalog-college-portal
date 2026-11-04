@@ -12,8 +12,10 @@ export function Card({ className, children }: { className?: string; children: Re
 /** Фирменный синий блок-приветствие с золотым кольцом как на гербе */
 export function HeroCard({ children }: { children: ReactNode }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-brand-900 p-6 text-white shadow-card md:p-8">
-      <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full border-[28px] border-gold-500/15" />
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-950 via-brand-900 to-brand-700 p-6 text-white md:p-8" style={{ boxShadow: "0 4px 24px -4px rgb(10 33 72 / 0.5)" }}>
+      <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full border-[28px] border-gold-500/20" />
+      <div className="pointer-events-none absolute -bottom-24 -left-12 size-56 rounded-full border-[20px] border-white/[0.04]" />
+      <div className="pointer-events-none absolute right-10 bottom-6 size-20 rounded-full bg-gold-500/10" />
       <div className="relative">{children}</div>
     </div>
   );
@@ -113,21 +115,21 @@ export const inputCls =
 
 export function StatCard({ label, value, hint, icon, tone = "brand" }: { label: string; value: ReactNode; hint?: ReactNode; icon: IconName; tone?: "brand" | "gold" | "green" | "red" }) {
   const tones = {
-    brand: "bg-brand-50 text-brand-700",
-    gold: "bg-gold-50 text-gold-600",
-    green: "bg-emerald-50 text-emerald-600",
-    red: "bg-rose-50 text-rose-600",
+    brand: { icon: "bg-gradient-to-br from-brand-600 to-brand-800 text-white", accent: "border-brand-100" },
+    gold: { icon: "bg-gradient-to-br from-gold-400 to-gold-600 text-brand-950", accent: "border-gold-100" },
+    green: { icon: "bg-gradient-to-br from-emerald-400 to-emerald-600 text-white", accent: "border-emerald-100" },
+    red: { icon: "bg-gradient-to-br from-rose-400 to-rose-600 text-white", accent: "border-rose-100" },
   };
   return (
-    <Card className="p-4 sm:p-5">
+    <Card className={cx("p-4 sm:p-5 border-t-2", tones[tone].accent)} style={{ boxShadow: "var(--shadow-stat)" }}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[13px] font-medium text-muted">{label}</p>
           <p className="mt-1.5 text-2xl font-bold sm:text-[28px] leading-none tracking-tight text-brand-900">{value}</p>
           {hint && <p className="mt-2 text-xs text-muted">{hint}</p>}
         </div>
-        <span className={cx("hidden size-10 shrink-0 place-items-center rounded-xl sm:grid", tones[tone])}>
-          <Icon name={icon} />
+        <span className={cx("size-11 shrink-0 grid place-items-center rounded-2xl shadow-sm", tones[tone].icon)}>
+          <Icon name={icon} className="size-5" />
         </span>
       </div>
     </Card>

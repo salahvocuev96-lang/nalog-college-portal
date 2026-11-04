@@ -87,7 +87,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Шапка */}
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-line bg-white/95 backdrop-blur shadow-sm">
         <div className="flex h-16 items-center gap-3 px-4 md:px-8">
           <Link href="/home/" className="flex items-center gap-2.5 lg:hidden">
             <Crest className="size-9" />
@@ -105,19 +105,20 @@ export function AppShell({ children }: { children: ReactNode }) {
       <Toaster />
 
       {/* Нижнее меню для телефона и планшета */}
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white lg:hidden">
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 backdrop-blur lg:hidden">
         <div className="grid grid-cols-5">
           {mobileMain.map((it) => (
-            <Link key={it.href} href={it.href} className={cx("flex min-h-[60px] flex-col items-center justify-center gap-0.5 text-[11px] font-medium", isActive(it.href) ? "text-brand-800" : "text-muted")}>
-              <span className={cx("grid h-7 w-12 place-items-center rounded-full transition-colors duration-200", isActive(it.href) && "bg-brand-50")}>
-                <Icon name={it.icon} className={cx("size-[22px]", isActive(it.href) && "text-gold-600")} />
+            <Link key={it.href} href={it.href} className={cx("flex min-h-[60px] flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors", isActive(it.href) ? "text-brand-800" : "text-muted")}>
+              <span className={cx("relative grid h-8 w-12 place-items-center rounded-2xl transition-all duration-200", isActive(it.href) ? "bg-gradient-to-b from-brand-700 to-brand-900 shadow-sm" : "")}>
+                <Icon name={it.icon} className={cx("size-[20px] transition-colors", isActive(it.href) ? "text-white" : "")} />
+                <NavCounter href={it.href} />
               </span>
-              <span className="max-w-full truncate px-1">{it.short}</span>
+              <span className={cx("max-w-full truncate px-1", isActive(it.href) && "font-semibold")}>{it.short}</span>
             </Link>
           ))}
           <button onClick={() => setMore((v) => !v)} aria-expanded={more} className={cx("flex min-h-[60px] flex-col items-center justify-center gap-0.5 text-[11px] font-medium", more ? "text-brand-800" : "text-muted")}>
-            <span className={cx("grid h-7 w-12 place-items-center rounded-full", more && "bg-brand-50")}><Icon name="menu" className="size-[22px]" /></span>
-            Ещё
+            <span className={cx("grid h-8 w-12 place-items-center rounded-2xl transition-all duration-200", more ? "bg-gradient-to-b from-brand-700 to-brand-900 shadow-sm" : "")}><Icon name="menu" className={cx("size-[20px]", more ? "text-white" : "")} /></span>
+            <span className={cx(more && "font-semibold")}>Ещё</span>
           </button>
         </div>
       </nav>
