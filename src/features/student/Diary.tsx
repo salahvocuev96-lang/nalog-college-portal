@@ -1,21 +1,23 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useViewer } from "../useViewer";
-import { Button, Card, GradeChip, PageHeader, cx } from "@/components/ui";
+import { Button, Card, Field, GradeChip, PageHeader, Select, cx, inputCls } from "@/components/ui";
 import { Icon } from "@/components/icons";
-import { addDays, formatLong, formatShort, startOfWeek, today, WEEKDAYS } from "@/lib/dates";
+import { addDays, formatLong, formatShort, startOfWeek, WEEKDAYS } from "@/lib/dates";
 import { groupLessons } from "@/lib/queries";
-import { key } from "@/lib/seed";
+import { key } from "@/lib/constants";
 import { ATT_META } from "@/features/shared/attendance";
 
 export function Diary() {
   const { db, version, student } = useViewer();
-  const now = today();
+  const now = db.serverToday;
   const [week, setWeek] = useState(startOfWeek(now));
+  const [subjectId, setSubjectId] = useState("");
   const days = useMemo(() => Array.from({ length: 6 }, (_, i) => addDays(week, i)), [week]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const hwByDue = useMemo(() => db.homework.filter((h) => h.groupId === student?.groupId), [db, version, student]);
   if (!student) return null;
+  const subjects = db.subjects.filter((s) => db.schedule.some((x) => x.groupId === student.groupId && x.subjectId === s.id));
 
   return (
     <div>
@@ -30,9 +32,18 @@ export function Diary() {
           </div>
         }
       />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <Card className="mb-5 grid gap-3 p-4 sm:grid-cols-[1fr_200px]">
+        <Select label="Предмет" value={subjectId} onChange={(e) => setSubjectId(e.target.value)}>
+          <option value="">Все предметы</option>
+          {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </Select>
+        <Field label="Перейти к дате">
+          <input type="date" className={inputCls} value={week} onChange={(e) => e.target.value && setWeek(startOfWeek(e.target.value))} />
+        </Field>
+      </Card>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 stagger">
         {days.map((d, i) => {
-          const lessons = groupLessons(db, student.groupId, d);
+          const lessons = groupLessons(db, student.groupId, d).filter((l) => !subjectId || l.subjectId === subjectId);
           const isToday = d === now;
           return (
             <Card key={d} className={cx("overflow-hidden", isToday && "ring-2 ring-gold-500")}>
@@ -53,7 +64,7 @@ export function Diary() {
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium leading-snug">{l.subject}</p>
                           <p className="text-xs text-muted">{l.time}{l.room && ` · каб. ${l.room}`}</p>
-                          {hw && <p className="mt-1 text-xs text-brand-700"><span className="font-semibold">ДЗ:</span> {hw.text}</p>}
+                          {hw && <p className="mt-1 text-xs text-brand-700"><span className="font-semibold">Сдать ДЗ:</span> {hw.title}</p>}
                         </div>
                         <div className="flex shrink-0 items-start gap-1">
                           {a && <span className={cx("grid size-7 place-items-center rounded-lg text-xs font-bold", ATT_META[a.status].chip)} title={ATT_META[a.status].label}>{ATT_META[a.status].short}</span>}

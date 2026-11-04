@@ -6,7 +6,7 @@ import { Icon, type IconName } from "./icons";
 export const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(" ");
 
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cx("rounded-2xl border border-line bg-white shadow-card", className)}>{children}</div>;
+  return <div className={cx("min-w-0 rounded-[var(--radius-card)] border border-line bg-white shadow-card", className)}>{children}</div>;
 }
 
 /** Фирменный синий блок-приветствие с золотым кольцом как на гербе */
@@ -33,7 +33,7 @@ export function CardHeader({ title, action, icon }: { title: ReactNode; action?:
 
 export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="mb-6 flex animate-enter flex-wrap items-end justify-between gap-4">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-brand-900 md:text-[28px]">{title}</h1>
         {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
@@ -43,17 +43,18 @@ export function PageHeader({ title, subtitle, action }: { title: string; subtitl
   );
 }
 
-type BtnVariant = "gold" | "brand" | "ghost" | "outline";
+type BtnVariant = "gold" | "brand" | "ghost" | "outline" | "danger";
 export function Button({ variant = "brand", className, children, ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: BtnVariant }) {
   const styles: Record<BtnVariant, string> = {
     gold: "bg-gold-500 text-brand-950 hover:bg-gold-400 shadow-sm",
     brand: "bg-brand-800 text-white hover:bg-brand-700",
     ghost: "text-brand-800 hover:bg-brand-50",
     outline: "border border-line bg-white text-brand-900 hover:border-brand-700/40 hover:bg-brand-50",
+    danger: "bg-danger text-white hover:brightness-110",
   };
   return (
     <button
-      className={cx("inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 text-sm font-semibold transition disabled:opacity-50", styles[variant], className)}
+      className={cx("inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 text-sm font-semibold transition duration-150 active:scale-[0.97] disabled:opacity-50 disabled:active:scale-100", styles[variant], className)}
       {...rest}
     >
       {children}
@@ -71,6 +72,38 @@ export function Select({ label, className, children, ...rest }: SelectHTMLAttrib
       >
         {children}
       </select>
+    </label>
+  );
+}
+
+export function Field({ label, hint, className, children }: { label: string; hint?: ReactNode; className?: string; children: ReactNode }) {
+  return (
+    <label className={cx("flex min-w-0 flex-col gap-1.5", className)}>
+      <span className="text-xs font-medium uppercase tracking-wide text-muted">{label}</span>
+      {children}
+      {hint && <span className="text-xs text-muted">{hint}</span>}
+    </label>
+  );
+}
+
+export function Badge({ tone = "brand", children, className }: { tone?: "brand" | "gold" | "green" | "red" | "gray" | "sky"; children: ReactNode; className?: string }) {
+  const tones = {
+    brand: "bg-brand-50 text-brand-700 ring-brand-100",
+    gold: "bg-gold-50 text-gold-700 ring-gold-100",
+    green: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+    red: "bg-rose-50 text-rose-600 ring-rose-100",
+    gray: "bg-slate-100 text-slate-600 ring-slate-200",
+    sky: "bg-sky-50 text-sky-700 ring-sky-100",
+  };
+  return <span className={cx("inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1", tones[tone], className)}>{children}</span>;
+}
+
+/** Поле поиска с иконкой */
+export function SearchInput({ value, onChange, placeholder = "Поиск", className }: { value: string; onChange: (v: string) => void; placeholder?: string; className?: string }) {
+  return (
+    <label className={cx("relative block min-w-0", className)}>
+      <Icon name="search" className="pointer-events-none absolute left-3 top-1/2 size-[18px] -translate-y-1/2 text-muted" />
+      <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className={cx(inputCls, "pl-9")} />
     </label>
   );
 }
@@ -148,12 +181,13 @@ export function Empty({ icon = "book", title, text }: { icon?: IconName; title: 
 
 export function Segmented<T extends string>({ value, onChange, options }: { value: T; onChange: (v: T) => void; options: { value: T; label: string }[] }) {
   return (
-    <div className="inline-flex rounded-xl bg-brand-50 p-1">
+    <div className="inline-flex max-w-full overflow-x-auto rounded-xl bg-brand-50 p-1 [scrollbar-width:none]">
       {options.map((o) => (
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
-          className={cx("h-8 whitespace-nowrap rounded-lg px-3 text-[13px] font-semibold transition", value === o.value ? "bg-white text-brand-900 shadow-sm" : "text-muted hover:text-brand-800")}
+          aria-pressed={value === o.value}
+          className={cx("h-8 whitespace-nowrap rounded-lg px-3 text-[13px] font-semibold transition-all duration-200", value === o.value ? "bg-white text-brand-900 shadow-sm" : "text-muted hover:text-brand-800")}
         >
           {o.label}
         </button>

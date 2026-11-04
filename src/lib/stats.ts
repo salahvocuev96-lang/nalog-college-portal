@@ -1,5 +1,5 @@
 // Расчёт средних баллов: обычное арифметическое среднее.
-import type { DB } from "./seed";
+import type { DB } from "./db-types";
 import type { AttendanceStatus, Grade, ID, ISODate } from "./types";
 import { Period, inPeriod, dateRange, weekday } from "./dates";
 
@@ -79,4 +79,14 @@ export function attendanceSummary(db: DB, studentId: ID, period: Period, until: 
   }
   res.rate = res.total ? Math.round(((res.present + res.late) / res.total) * 100) : 100;
   return res;
+}
+
+/**
+ * Итоговая оценка по среднему баллу. Правило настраивается администрацией (settings.finalGradeRule).
+ * Это демонстрационные правила, а не официальное положение колледжа: перед эксплуатацией их нужно утвердить.
+ */
+export function finalGrade(avg: number | null, rule: "mean_round" | "mean_floor" = "mean_round"): 2 | 3 | 4 | 5 | null {
+  if (avg === null) return null;
+  const v = rule === "mean_floor" ? Math.floor(avg + 1e-9) : Math.round(avg + 1e-9);
+  return Math.min(5, Math.max(2, v)) as 2 | 3 | 4 | 5;
 }

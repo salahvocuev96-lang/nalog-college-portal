@@ -9,7 +9,7 @@ import { ATT_META } from "@/features/shared/attendance";
 
 export function StudentAttendance() {
   const { db, version, student, isParent } = useViewer();
-  const now = today();
+  const now = db.serverToday;
   const [kind, setKind] = useState<PeriodKind>("semester");
   const period = periodFor(kind, now);
   const data = useMemo(() => {

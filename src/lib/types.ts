@@ -1,7 +1,8 @@
-// Доменная модель портала. Все сущности ссылаются друг на друга по id,
-// чтобы позже без переделки UI заменить LocalStorage на настоящий API/БД.
+// Доменная модель портала. Общая для сервера (src/server) и интерфейса.
+// Сущности ссылаются друг на друга по id; хранятся в SQLite (db/migrations).
 
-export type Role = "student" | "teacher" | "parent" | "admin";
+/** Роли. college_admin управляет учебной частью, tech_admin обслуживает систему и не видит оценки */
+export type Role = "student" | "teacher" | "parent" | "college_admin" | "tech_admin";
 
 export type ID = string;
 export type ISODate = string; // YYYY-MM-DD
@@ -12,6 +13,8 @@ export interface Group {
   course: 1 | 2 | 3 | 4;
   specialty: string; // буквенный код: П, Б, БД...
   curatorId?: ID;
+  /** Группа добавлена для демонстрации объёма: расписание скопировано у группы того же курса */
+  isDemo?: boolean;
 }
 
 export interface Student {
@@ -30,6 +33,12 @@ export interface Parent {
   phone: string;
 }
 
+export interface Staff {
+  id: ID;
+  name: string;
+  role: "college_admin" | "tech_admin";
+}
+
 export interface Teacher {
   id: ID;
   name: string; // Фамилия И.О.
@@ -43,6 +52,7 @@ export interface Subject {
 }
 
 export interface ScheduleSlot {
+  id: number;
   groupId: ID;
   weekday: number; // 1 = понедельник ... 6 = суббота
   slot: number; // номер пары
@@ -66,6 +76,7 @@ export interface Grade {
   date: ISODate;
   value: GradeValue;
   teacherId: ID;
+  updatedAt?: number;
 }
 
 /** Посещаемость хранится отдельно от оценок */
@@ -83,10 +94,15 @@ export interface Homework {
   groupId: ID;
   subjectId: ID;
   teacherId: ID;
-  issued: ISODate;
-  due: ISODate;
-  text: string;
+  issued: ISODate; // дата публикации
+  due: ISODate; // срок сдачи
+  title: string;
+  text: string; // описание
 }
+
+/** Статус задания у конкретного студента. «Новое» = записи нет, «Просрочено» вычисляется по сроку */
+export type HomeworkProgress = "in_progress" | "done";
+export type HomeworkStatus = "new" | HomeworkProgress | "overdue";
 
 export interface Message {
   id: ID;
@@ -97,7 +113,7 @@ export interface Message {
   read: boolean;
 }
 
-export type NotificationKind = "grade" | "message" | "homework" | "attendance";
+export type NotificationKind = "grade" | "grade_change" | "message" | "homework" | "attendance" | "schedule" | "announcement";
 
 export interface Notification {
   id: ID;
@@ -114,4 +130,46 @@ export interface SessionUser {
   id: ID;
   role: Role;
   name: string;
+  login: string;
+  mustChangePassword: boolean;
+}
+
+/** Запись журнала аудита. Таблица в БД защищена триггерами от изменения и удаления */
+export interface AuditEntry {
+  id: number;
+  at: number;
+  actorId: ID;
+  actorRole: Role | "system";
+  action: string; // grade.create, grade.update, grade.delete, attendance.set, schedule.update, auth.login ...
+  entity: string;
+  entityId: string;
+  before: string | null; // JSON
+  after: string | null; // JSON
+  reason: string | null;
+}
+
+/** Учётная запись (без хеша пароля) для экрана администратора */
+export interface Account {
+  id: ID;
+  login: string;
+  role: Role;
+  name: string;
+  mustChangePassword: boolean;
+  active: boolean;
+  createdAt: number;
+}
+
+export interface PasswordResetRequest {
+  id: number;
+  login: string;
+  at: number;
+  status: "open" | "done";
+}
+
+/** Настраиваемые правила и учебные периоды (таблица settings). Даты семестров в формате MM-DD */
+export interface Settings {
+  semester1: { from: string; to: string };
+  semester2: { from: string; to: string };
+  /** Правило итоговой оценки. Демо: среднее арифметическое, округление по правилам математики */
+  finalGradeRule: "mean_round" | "mean_floor";
 }

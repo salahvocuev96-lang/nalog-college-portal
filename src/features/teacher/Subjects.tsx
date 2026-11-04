@@ -6,7 +6,7 @@ import { groupAverage } from "@/lib/stats";
 
 export function TeacherSubjects() {
   const { db, session, loads, subjects } = useTeacher();
-  const sem = semesterPeriod(today());
+  const sem = semesterPeriod(db.serverToday, db.settings);
   return (
     <div>
       <PageHeader title="Мои предметы" subtitle="Предметы и группы закреплены за вами по расписанию" />

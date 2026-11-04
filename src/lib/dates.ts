@@ -5,8 +5,20 @@ export const WEEKDAYS_SHORT = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "
 const MONTHS_GEN = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
 export const MONTHS = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
 
-/** Время звонков (пары по 90 минут) */
-export const BELLS = ["08:30-10:00", "10:10-11:40", "12:10-13:40", "13:50-15:20", "15:30-17:00", "17:10-18:40"];
+/** Время пар. Перенесено без изменений из проекта расписания колледжа (index.html, timeSlots) */
+export const TIME_SLOTS = [
+  { start: "09:00", end: "10:30" },
+  { start: "10:35", end: "12:05" },
+  { start: "12:35", end: "14:05" },
+  { start: "14:15", end: "15:45" },
+  { start: "15:55", end: "17:25" },
+  { start: "17:30", end: "19:00" },
+];
+export const BELLS = TIME_SLOTS.map((t) => `${t.start}-${t.end}`);
+export const toMinutes = (hm: string) => {
+  const [h, m] = hm.split(":").map(Number);
+  return h * 60 + m;
+};
 
 export function toISO(d: Date): ISODate {
   const y = d.getFullYear();
@@ -87,12 +99,22 @@ export function yearPeriod(s: ISODate): Period {
   return { kind: "year", from: `${y}-09-01`, to: `${y + 1}-06-30`, label: `${y}/${y + 1} учебный год` };
 }
 
-export function semesterPeriod(s: ISODate): Period {
+/** Границы семестров настраиваются администрацией (settings), здесь значения по умолчанию */
+export interface SemesterBounds {
+  semester1: { from: string; to: string };
+  semester2: { from: string; to: string };
+}
+const DEFAULT_BOUNDS: SemesterBounds = { semester1: { from: "09-01", to: "12-31" }, semester2: { from: "01-12", to: "06-30" } };
+
+export function semesterByNumber(n: 1 | 2, s: ISODate, b: SemesterBounds = DEFAULT_BOUNDS): Period {
   const y = academicYear(s);
-  const first = fromISO(s).getMonth() >= 8;
-  return first
-    ? { kind: "semester", from: `${y}-09-01`, to: `${y}-12-31`, label: "1 семестр" }
-    : { kind: "semester", from: `${y + 1}-01-01`, to: `${y + 1}-06-30`, label: "2 семестр" };
+  return n === 1
+    ? { kind: "semester", from: `${y}-${b.semester1.from}`, to: `${y}-${b.semester1.to}`, label: "1 семестр" }
+    : { kind: "semester", from: `${y + 1}-${b.semester2.from}`, to: `${y + 1}-${b.semester2.to}`, label: "2 семестр" };
+}
+
+export function semesterPeriod(s: ISODate, b: SemesterBounds = DEFAULT_BOUNDS): Period {
+  return fromISO(s).getMonth() >= 8 ? semesterByNumber(1, s, b) : semesterByNumber(2, s, b);
 }
 
 export function monthPeriod(s: ISODate): Period {

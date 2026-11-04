@@ -4,17 +4,19 @@ import { useMemo } from "react";
 import { useViewer } from "../useViewer";
 import { Card, HeroCard, CardHeader, Empty, GradeChip, StatCard } from "@/components/ui";
 import { attendanceSummary, gradesOf, studentAverage, fmtAvg } from "@/lib/stats";
-import { formatLong, formatShort, formatWithWeekday, semesterPeriod, today } from "@/lib/dates";
-import { groupLessons, nextSchoolDay, subjectName } from "@/lib/queries";
-import { SPECIALTIES } from "@/lib/seed";
-import { key } from "@/lib/seed";
+import { formatLong, formatShort, formatTime, formatWithWeekday, semesterPeriod } from "@/lib/dates";
+import { groupLessons, homeworkStatus, nextSchoolDay, subjectName } from "@/lib/queries";
+import { KIND_ICON } from "@/components/AppShell";
+import { Icon } from "@/components/icons";
+import { SPECIALTIES } from "@/lib/constants";
+import { key } from "@/lib/constants";
 
 export function StudentHome() {
   const { db, version, student, group, isParent } = useViewer();
-  const now = today();
+  const now = db.serverToday;
   const data = useMemo(() => {
     if (!student || !group) return null;
-    const sem = semesterPeriod(now);
+    const sem = semesterPeriod(now, db.settings);
     const day = nextSchoolDay(now);
     return {
       sem,
@@ -23,7 +25,8 @@ export function StudentHome() {
       att: attendanceSummary(db, student.id, sem, now),
       lessons: groupLessons(db, group.id, day),
       recent: gradesOf(db, student.id).slice(-8).reverse(),
-      hw: db.homework.filter((h) => h.groupId === group.id && h.due >= now && !db.homeworkDone[`${h.id}|${student.id}`]).sort((a, b) => a.due.localeCompare(b.due)),
+      hw: db.homework.filter((h) => h.groupId === group.id && h.due >= now && homeworkStatus(db, h, student.id, now) !== "done").sort((a, b) => a.due.localeCompare(b.due)),
+      notes: [...db.notifications].sort((a, b) => b.at - a.at).slice(0, 4),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db, version, student, group, now]);
@@ -31,7 +34,7 @@ export function StudentHome() {
 
   const firstName = student.name.split(" ")[1];
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 stagger">
       <HeroCard>
         <p className="text-sm text-white/60">{formatWithWeekday(now)}</p>
         <h1 className="mt-1 text-2xl font-bold md:text-3xl">
@@ -40,6 +43,7 @@ export function StudentHome() {
         <div className="mt-4 flex flex-wrap gap-2 text-[13px]">
           <span className="rounded-full bg-gold-500 px-3 py-1 font-bold text-brand-950">Группа {group.code}</span>
           <span className="rounded-full bg-white/10 px-3 py-1">{group.course} курс</span>
+          <span className="rounded-full bg-white/10 px-3 py-1">{data.sem.label}</span>
           <span className="rounded-full bg-white/10 px-3 py-1">{SPECIALTIES[group.specialty] ?? group.specialty}</span>
         </div>
       </HeroCard>
@@ -96,25 +100,44 @@ export function StudentHome() {
         </Card>
       </div>
 
+      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
       <Card>
-        <CardHeader icon="task" title="Домашние задания" action={<Link href="/homework/" className="text-[13px] font-semibold text-gold-600">Все задания</Link>} />
+        <CardHeader icon="task" title="Ближайшие задания" action={<Link href="/homework/" className="text-[13px] font-semibold text-gold-600">Все задания</Link>} />
         {data.hw.length === 0 ? (
           <Empty icon="task" title="Все задания сданы" />
         ) : (
-          <ul className="grid gap-3 p-4 md:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
             {data.hw.slice(0, 4).map((h) => (
-              <li key={h.id} className="rounded-xl border border-line p-4">
+              <li key={h.id} className="min-w-0 rounded-xl border border-line p-4">
                 <div className="flex items-center justify-between gap-2">
                   <p className="truncate text-sm font-semibold text-brand-900">{subjectName(db, h.subjectId)}</p>
                   <span className="shrink-0 rounded-full bg-gold-50 px-2.5 py-0.5 text-xs font-semibold text-gold-600">до {formatShort(h.due)}</span>
                 </div>
-                <p className="mt-1.5 text-sm text-muted">{h.text}</p>
+                <p className="mt-1.5 text-sm font-medium text-ink">{h.title}</p>
+                <p className="mt-0.5 line-clamp-2 text-sm text-muted">{h.text}</p>
               </li>
             ))}
           </ul>
         )}
       </Card>
-
+      <Card>
+        <CardHeader icon="bell" title="Уведомления" action={<Link href="/notifications/" className="text-[13px] font-semibold text-gold-600">Все</Link>} />
+        {data.notes.length === 0 ? <Empty icon="bell" title="Уведомлений нет" /> : (
+          <ul className="divide-y divide-line">
+            {data.notes.map((n) => (
+              <li key={n.id} className="flex gap-3 px-5 py-3">
+                <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-700"><Icon name={KIND_ICON[n.kind]} className="size-4" /></span>
+                <span className="min-w-0">
+                  <span className="flex items-center gap-2 text-[13px] font-semibold text-brand-900">{n.title}{!n.read && <span className="size-1.5 rounded-full bg-gold-500" />}</span>
+                  <span className="block truncate text-[13px] text-muted">{n.text}</span>
+                  <span className="text-[11px] text-muted/80">{formatTime(n.at)}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+      </div>
     </div>
   );
 }

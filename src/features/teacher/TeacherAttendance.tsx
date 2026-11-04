@@ -9,8 +9,8 @@ export function TeacherAttendance() {
   const { db, groups } = useTeacher();
   const [groupId, setGroupId] = useState(groups[0]?.id ?? "");
   const [kind, setKind] = useState<PeriodKind>("month");
-  const period = periodFor(kind, today());
-  const rows = db.students.filter((s) => s.groupId === groupId).map((s) => ({ s, a: attendanceSummary(db, s.id, period, today()) }));
+  const period = periodFor(kind, db.serverToday);
+  const rows = db.students.filter((s) => s.groupId === groupId).map((s) => ({ s, a: attendanceSummary(db, s.id, period, db.serverToday) }));
 
   return (
     <div>

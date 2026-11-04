@@ -4,12 +4,12 @@ import { useTeacher } from "./useTeacher";
 import { AvgBadge, Card, CardHeader, PageHeader, cx } from "@/components/ui";
 import { semesterPeriod, today } from "@/lib/dates";
 import { attendanceSummary, groupAverage, studentAverage } from "@/lib/stats";
-import { SPECIALTIES } from "@/lib/seed";
+import { SPECIALTIES } from "@/lib/constants";
 
 export function TeacherGroups() {
   const { db, loads, groups } = useTeacher();
   const [open, setOpen] = useState(groups[0]?.id ?? "");
-  const sem = semesterPeriod(today());
+  const sem = semesterPeriod(db.serverToday, db.settings);
 
   return (
     <div>
@@ -37,7 +37,7 @@ export function TeacherGroups() {
               {db.students.filter((s) => s.groupId === open).map((s, i) => {
                 const mySubj = loads.filter((l) => l.groupId === open).map((l) => l.subjectId);
                 const avgs = mySubj.map((sid) => studentAverage(db, s.id, { subjectId: sid, period: sem })).filter((v): v is number => v !== null);
-                const att = attendanceSummary(db, s.id, sem, today());
+                const att = attendanceSummary(db, s.id, sem, db.serverToday);
                 return (
                   <li key={s.id} className="flex items-center gap-3 px-5 py-3">
                     <span className="w-6 text-sm text-muted">{i + 1}</span>

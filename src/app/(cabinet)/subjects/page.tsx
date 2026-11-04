@@ -4,5 +4,5 @@ import { TeacherSubjects } from "@/features/teacher/Subjects";
 import { AdminSubjects } from "@/features/admin/Admin";
 
 export default function Page() {
-  return <RoleView views={{ teacher: TeacherSubjects, admin: AdminSubjects }} />;
+  return <RoleView views={{ teacher: TeacherSubjects, college_admin: AdminSubjects }} />;
 }

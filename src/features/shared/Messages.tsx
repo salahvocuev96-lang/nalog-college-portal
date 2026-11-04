@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { markThreadRead, sendMessage, useStore } from "@/lib/store";
 import { contactsFor, nameOf } from "@/lib/access";
-import { Avatar, Button, Card, Empty, PageHeader, cx, inputCls } from "@/components/ui";
+import { Avatar, Button, Card, Empty, PageHeader, SearchInput, cx, inputCls } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { formatTime } from "@/lib/dates";
 import type { ID } from "@/lib/types";
@@ -35,14 +35,19 @@ export function Messages() {
   const contacts = useMemo(() => contactsFor(db, session!), [db, session]);
   const chat = active ? db.messages.filter((m) => (m.from === me && m.to === active) || (m.to === me && m.from === active)).sort((a, b) => a.at - b.at) : [];
 
-  useEffect(() => { if (active) markThreadRead(active); }, [active, chat.length]);
+  const unreadHere = chat.some((m) => m.to === me && !m.read);
+  useEffect(() => { if (active && unreadHere) markThreadRead(active); }, [active, unreadHere]);
+  const [tq, setTq] = useState("");
+  const [sending, setSending] = useState(false);
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end" });
   }, [active, chat.length]);
 
-  const send = () => {
-    if (!active) return;
-    const r = sendMessage(active, text);
+  const send = async () => {
+    if (!active || sending) return;
+    setSending(true);
+    const r = await sendMessage(active, text);
+    setSending(false);
     if (r.ok) { setText(""); setErr(""); } else setErr(r.error);
   };
 
@@ -63,7 +68,10 @@ export function Messages() {
                 <Button variant="ghost" onClick={() => { setCompose(false); setQ(""); }} aria-label="Закрыть"><Icon name="close" className="size-4" /></Button>
               </>
             ) : (
-              <Button variant="gold" className="w-full" onClick={() => setCompose(true)}><Icon name="plus" className="size-4" />Новое сообщение</Button>
+              <div className="flex w-full gap-2">
+                <SearchInput value={tq} onChange={setTq} placeholder="Поиск диалога" className="flex-1" />
+                <Button variant="gold" onClick={() => setCompose(true)} aria-label="Новое сообщение" title="Новое сообщение"><Icon name="plus" className="size-4" /></Button>
+              </div>
             )}
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
@@ -79,7 +87,7 @@ export function Messages() {
                 ))
               : threads.length === 0
                 ? <Empty icon="chat" title="Диалогов пока нет" text="Нажмите «Новое сообщение» и выберите адресата" />
-                : threads.map(([id, t]) => (
+                : threads.filter(([id, t]) => !tq.trim() || nameOf(db, id).toLowerCase().includes(tq.trim().toLowerCase()) || t.preview.toLowerCase().includes(tq.trim().toLowerCase())).map(([id, t]) => (
                     <button key={id} onClick={() => setActive(id)} className={cx("flex w-full items-center gap-3 border-b border-line px-4 py-3 text-left hover:bg-page", active === id && "bg-brand-50")}>
                       <Avatar name={nameOf(db, id)} className="size-10 text-xs" />
                       <span className="min-w-0 flex-1">
@@ -109,10 +117,10 @@ export function Messages() {
               <div className="min-h-0 flex-1 space-y-2 overflow-y-auto bg-page px-4 py-4">
                 {chat.length === 0 && <p className="py-10 text-center text-sm text-muted">Напишите первое сообщение</p>}
                 {chat.map((m) => (
-                  <div key={m.id} className={cx("flex", m.from === me ? "justify-end" : "justify-start")}>
+                  <div key={m.id} className={cx("flex animate-enter", m.from === me ? "justify-end" : "justify-start")}>
                     <div className={cx("max-w-[80%] rounded-2xl px-3.5 py-2 text-sm shadow-sm", m.from === me ? "rounded-br-md bg-brand-800 text-white" : "rounded-bl-md bg-white text-ink")}>
                       <p className="whitespace-pre-wrap">{m.text}</p>
-                      <p className={cx("mt-1 text-right text-[10px]", m.from === me ? "text-white/60" : "text-muted")}>{formatTime(m.at)}</p>
+                      <p className={cx("mt-1 text-right text-[10px]", m.from === me ? "text-white/60" : "text-muted")}>{formatTime(m.at)}{m.from === me && (m.read ? " · прочитано" : " · отправлено")}</p>
                     </div>
                   </div>
                 ))}
@@ -122,7 +130,7 @@ export function Messages() {
                 {err && <p className="mb-2 text-xs text-rose-600">{err}</p>}
                 <div className="flex gap-2">
                   <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Сообщение" className={inputCls} />
-                  <Button variant="gold" type="submit" disabled={!text.trim()} aria-label="Отправить"><Icon name="send" className="size-4" /></Button>
+                  <Button variant="gold" type="submit" disabled={!text.trim() || sending} aria-label="Отправить"><Icon name="send" className="size-4" /></Button>
                 </div>
               </form>
             </>

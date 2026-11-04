@@ -1,15 +1,23 @@
 import type { NextConfig } from "next";
 
-// Статический экспорт: демо можно открыть с любого хостинга (GitHub Pages, Netlify) без сервера.
-// BASE_PATH задаётся при сборке для GitHub Pages (сайт живёт в подпапке /2p1/app)
-const basePath = process.env.BASE_PATH || "";
-
+// Серверный режим: права доступа проверяются на сервере (src/server), поэтому статический экспорт не используется.
 const nextConfig: NextConfig = {
-  output: "export",
-  basePath,
-  env: { NEXT_PUBLIC_BASE_PATH: basePath },
+  serverExternalPackages: [],
+  poweredByHeader: false,
   trailingSlash: true,
-  images: { unoptimized: true },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Referrer-Policy", value: "same-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

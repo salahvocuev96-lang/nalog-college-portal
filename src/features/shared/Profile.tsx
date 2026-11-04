@@ -1,18 +1,36 @@
 "use client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { logout, resetDemo, useStore } from "@/lib/store";
+import { useConfirm, toastResult } from "@/components/feedback";
 import { ROLE_LABEL } from "@/lib/nav";
 import { Avatar, Button, Card, CardHeader, PageHeader } from "@/components/ui";
 import { Icon } from "@/components/icons";
-import { SPECIALTIES } from "@/lib/seed";
+import { SPECIALTIES } from "@/lib/constants";
 import { teacherLoads } from "@/lib/access";
 
 export function Profile() {
   const { db, session } = useStore();
+  const router = useRouter();
+  const confirm = useConfirm();
   const s = session!;
-  const rows: [string, string][] = [["Роль", ROLE_LABEL[s.role]]];
+  const rows: [string, string][] = [["Роль", ROLE_LABEL[s.role]], ["Логин", s.login]];
+  const isStaff = s.role === "college_admin" || s.role === "tech_admin";
+  const exit = async () => {
+    await logout();
+    router.replace("/");
+  };
+  const reset = async () => {
+    if (!(await confirm.ask("Сбросить демо-данные?", "Все изменения (оценки, сообщения, задания, аккаунты) будут удалены, база создастся заново. Вы выйдете из системы.", { confirm: "Сбросить", danger: true }))) return;
+    const r = await resetDemo();
+    toastResult(r);
+    if (r.ok) router.replace("/");
+  };
   if (s.role === "student") {
     const st = db.students.find((x) => x.id === s.id)!;
     const g = db.groups.find((x) => x.id === st.groupId)!;
+    const curator = db.teachers.find((t) => t.id === g.curatorId)?.name;
+    if (curator) rows.push(["Куратор", curator]);
     rows.push(["Группа", g.code], ["Курс", String(g.course)], ["Специальность", SPECIALTIES[g.specialty] ?? g.specialty], ["Эл. почта", st.email], ["Телефон", st.phone], ["Родитель", db.parents.find((p) => p.id === st.parentId)?.name ?? ""]);
   }
   if (s.role === "parent") {
@@ -33,29 +51,38 @@ export function Profile() {
       <PageHeader title="Профиль" />
       <Card>
         <div className="flex items-center gap-4 border-b border-line p-6">
-          <Avatar name={s.name} className="size-16 bg-brand-900 text-lg text-gold-400" />
+          <Avatar name={s.name} className="size-16 shrink-0 bg-brand-900 text-lg text-gold-400" />
           <div>
-            <p className="text-xl font-bold text-brand-900">{s.name}</p>
+            <p className="text-xl font-bold text-brand-900 [overflow-wrap:anywhere]">{s.name}</p>
             <p className="text-sm text-muted">{ROLE_LABEL[s.role]}</p>
           </div>
         </div>
         <dl className="divide-y divide-line">
           {rows.map(([k, v]) => (
-            <div key={k} className="grid grid-cols-[140px_1fr] gap-4 px-6 py-3 text-sm sm:grid-cols-[200px_1fr]">
+            <div key={k} className="grid grid-cols-[110px_minmax(0,1fr)] gap-4 px-6 py-3 text-sm sm:grid-cols-[200px_minmax(0,1fr)]">
               <dt className="text-muted">{k}</dt>
-              <dd className="font-medium text-ink">{v || "-"}</dd>
+              <dd className="font-medium text-ink [overflow-wrap:anywhere]">{v || "-"}</dd>
             </div>
           ))}
         </dl>
       </Card>
       <Card className="mt-6">
-        <CardHeader icon="settings" title="Демо-режим" />
+        <CardHeader icon="key" title="Безопасность" />
         <div className="flex flex-wrap gap-3 p-5">
-          <Button variant="outline" onClick={logout}><Icon name="logout" className="size-4" />Сменить роль</Button>
-          <Button variant="outline" onClick={() => confirm("Сбросить все изменения демо-версии?") && resetDemo()}>Сбросить демо-данные</Button>
+          <Link href="/change-password/" className="inline-flex h-10 items-center gap-2 rounded-xl border border-line bg-white px-4 text-sm font-semibold text-brand-900 hover:bg-brand-50"><Icon name="key" className="size-4" />Сменить пароль</Link>
+          <Button variant="outline" onClick={exit}><Icon name="logout" className="size-4" />Выйти</Button>
         </div>
-        <p className="px-5 pb-5 text-xs text-muted">Изменения хранятся в&nbsp;этом браузере (LocalStorage). Сброс вернёт исходные оценки и&nbsp;сообщения</p>
       </Card>
+      {isStaff && (
+        <Card className="mt-6">
+          <CardHeader icon="settings" title="Демо-режим" />
+          <div className="p-5">
+            <Button variant="outline" className="text-rose-600" onClick={reset}>Сбросить демо-данные</Button>
+            <p className="mt-3 text-xs text-muted">Данные хранятся на сервере в базе SQLite. Сброс пересоздаёт базу с исходными демо-данными. В рабочей версии (DEMO_MODE=false) функция отключена.</p>
+          </div>
+        </Card>
+      )}
+      {confirm.node}
     </div>
   );
 }
