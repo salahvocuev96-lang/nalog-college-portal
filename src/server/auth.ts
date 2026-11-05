@@ -8,7 +8,7 @@ import { DEMO_PASSWORD, DEMO_TEMP_PASSWORD, demoAccounts } from "./seed";
 import { transaction } from "./sqlite";
 
 export const SESSION_COOKIE = "nk_session";
-export const SESSION_TTL_MS = 1000 * 60 * 60 * 12; // 12 часов
+export const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 дней
 
 // ---------- Пароли (scrypt со случайной солью) ----------
 
