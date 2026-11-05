@@ -58,7 +58,9 @@ export function loadDB(sql: DatabaseSync): DB {
       id: S(r.id), userId: S(r.user_id), kind: S(r.kind) as Notification["kind"], title: S(r.title), text: S(r.text), at: N(r.at), read: N(r.read) === 1, href: S(r.href),
     })),
     settings: loadSettings(sql),
+    userPhotos: {},
   };
+  for (const r of all(sql, "SELECT id, photo FROM users WHERE photo IS NOT NULL")) db.userPhotos[S(r.id)] = S(r.photo);
   for (const r of all(sql, "SELECT * FROM grades")) {
     const g: Grade = { studentId: S(r.student_id), subjectId: S(r.subject_id), date: S(r.date), value: N(r.value) as Grade["value"], teacherId: S(r.teacher_id), updatedAt: N(r.updated_at) };
     db.grades[key(g.studentId, g.subjectId, g.date)] = g;

@@ -14,6 +14,12 @@ const pickRecord = <T,>(rec: Record<string, T>, ok: (v: T) => boolean) => {
   return out;
 };
 
+const pickPhotos = (all: Record<string, string>, ids: Set<string>) => {
+  const out: Record<string, string> = {};
+  for (const id of ids) if (all[id]) out[id] = all[id];
+  return out;
+};
+
 function groupStats(db: DB): GroupStat[] {
   const now = today();
   const sem = semesterPeriod(now, db.settings);
@@ -62,12 +68,13 @@ export function snapshotFor(c: Ctx, user: SessionUser): Snapshot {
     const loads = db.loads.filter((l) => groupIds.has(l.groupId));
     const teacherIds = new Set([...loads.map((l) => l.teacherId), ...base.messages.flatMap((m) => [m.from, m.to])]);
     const gradeKeys = Object.keys(db.grades).filter((k) => ids.has(k.split("|")[0]));
+    const visibleTeachers = db.teachers.filter((t) => teacherIds.has(t.id));
     return {
       ...base,
       groups: db.groups.filter((g) => groupIds.has(g.id)),
       students,
       parents: db.parents.filter((p) => p.childIds.some((c) => ids.has(c))),
-      teachers: db.teachers.filter((t) => teacherIds.has(t.id)),
+      teachers: visibleTeachers,
       schedule: db.schedule.filter((s) => groupIds.has(s.groupId)),
       loads,
       grades: pickRecord(db.grades, (g) => ids.has(g.studentId)),
@@ -75,6 +82,7 @@ export function snapshotFor(c: Ctx, user: SessionUser): Snapshot {
       homework: db.homework.filter((h) => groupIds.has(h.groupId)),
       homeworkProgress: Object.fromEntries(Object.entries(db.homeworkProgress).filter(([k]) => ids.has(k.split("|")[1]))),
       audit: readAudit(c, { entityPrefix: "grade", entityIds: gradeKeys, limit: 300 }),
+      userPhotos: pickPhotos(db.userPhotos, new Set([user.id, ...ids, ...visibleTeachers.map((t) => t.id)])),
     };
   }
 
@@ -94,12 +102,13 @@ export function snapshotFor(c: Ctx, user: SessionUser): Snapshot {
     const grades = pickRecord(db.grades, visible);
     const contacts = new Set(contactsFor(db, user).map((x) => x.id));
     const groupTeachers = new Set(db.loads.filter((l) => groupIds.has(l.groupId)).map((l) => l.teacherId));
+    const visibleTeachersT = db.teachers.filter((t) => t.id === user.id || contacts.has(t.id) || groupTeachers.has(t.id));
     return {
       ...base,
       groups: db.groups.filter((g) => groupIds.has(g.id)),
       students,
       parents: db.parents.filter((p) => p.childIds.some((c) => ids.has(c))),
-      teachers: db.teachers.filter((t) => t.id === user.id || contacts.has(t.id) || groupTeachers.has(t.id)),
+      teachers: visibleTeachersT,
       schedule: db.schedule.filter((s) => s.teacherId === user.id || groupIds.has(s.groupId)),
       loads: db.loads.filter((l) => groupIds.has(l.groupId)),
       grades,
@@ -107,6 +116,7 @@ export function snapshotFor(c: Ctx, user: SessionUser): Snapshot {
       homework: db.homework.filter((h) => groupIds.has(h.groupId)),
       homeworkProgress: Object.fromEntries(Object.entries(db.homeworkProgress).filter(([k]) => ids.has(k.split("|")[1]))),
       audit: readAudit(c, { entityPrefix: "grade", entityIds: Object.keys(grades), limit: 500 }),
+      userPhotos: pickPhotos(db.userPhotos, new Set([user.id, ...ids, ...visibleTeachersT.map((t) => t.id)])),
     };
   }
 
@@ -127,6 +137,7 @@ export function snapshotFor(c: Ctx, user: SessionUser): Snapshot {
       groupStats: groupStats(db),
       studentAvg: studentAverages(db),
       audit: readAudit(c, { limit: 300 }),
+      userPhotos: db.userPhotos,
     };
   }
 
@@ -144,5 +155,6 @@ export function snapshotFor(c: Ctx, user: SessionUser): Snapshot {
     homework: [],
     homeworkProgress: {},
     audit: readAudit(c, { limit: 300 }).map((e) => ({ ...e, before: null, after: null, reason: e.reason ? "скрыто" : null })),
+    userPhotos: pickPhotos(db.userPhotos, new Set([user.id])),
   };
 }

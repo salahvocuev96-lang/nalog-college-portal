@@ -21,6 +21,7 @@ export interface DB {
   messages: Message[];
   notifications: Notification[];
   settings: Settings;
+  userPhotos: Record<string, string>; // userId → base64 data URL
 }
 
 /** Агрегаты для администрации: сырые оценки ей не передаются */
@@ -39,6 +40,8 @@ export interface Snapshot extends DB {
   /** Только для администрации: средний балл студента за семестр */
   studentAvg?: Record<string, number | null>;
 }
+
+export const EMPTY_DB_EXTRAS = { userPhotos: {} as Record<string, string> };
 
 export const DEFAULT_SETTINGS: Settings = {
   semester1: { from: "09-01", to: "12-31" },

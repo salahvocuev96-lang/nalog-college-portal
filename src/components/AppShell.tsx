@@ -108,7 +108,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
         <div className="border-t border-line p-3">
           <div className="flex items-center gap-3 rounded-md px-2 py-2">
-            <Avatar name={session.name} className="size-9 text-[13px]" />
+            <Avatar name={session.name} photo={session.photo} className="size-9 text-[13px]" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-[13px] font-semibold text-ink">{session.name}</p>
               <p className="truncate text-xs text-muted">{ROLE_LABEL[session.role]}</p>
@@ -134,7 +134,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
 <Bell />
-            <UserMenu name={session.name} role={ROLE_LABEL[session.role]} onLogout={onLogout} />
+            <UserMenu name={session.name} photo={session.photo} role={ROLE_LABEL[session.role]} onLogout={onLogout} />
           </div>
         </div>
       </header>
@@ -170,7 +170,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="safe-bottom absolute inset-x-0 bottom-[58px] max-h-[75dvh] animate-sheet overflow-y-auto rounded-t-2xl bg-white pb-2 shadow-[var(--shadow-pop)]" onClick={(e) => e.stopPropagation()}>
             <div className="mx-auto mb-1 mt-2 h-1 w-10 rounded-full bg-slate-200" />
             <div className="flex items-center gap-3 border-b border-line px-4 py-3">
-              <Avatar name={session.name} />
+              <Avatar name={session.name} photo={session.photo} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-ink">{session.name}</p>
                 <p className="text-xs text-muted">{ROLE_LABEL[session.role]}</p>
@@ -200,13 +200,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 
-function UserMenu({ name, role, onLogout }: { name: string; role: string; onLogout: () => void }) {
+function UserMenu({ name, photo, role, onLogout }: { name: string; photo?: string; role: string; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
   const ref = useOutside<HTMLDivElement>(() => setOpen(false));
   return (
     <div className="relative hidden lg:block" ref={ref}>
       <button onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-label="Меню пользователя" className="flex items-center gap-2 rounded-md py-1 pl-1 pr-2 transition-colors hover:bg-subtle">
-        <Avatar name={name} className="size-8 text-xs" />
+        <Avatar name={name} photo={photo} className="size-8 text-xs" />
         <Icon name="chevronRight" className={cx("size-3.5 text-muted transition-transform", open ? "-rotate-90" : "rotate-90")} />
       </button>
       {open && (

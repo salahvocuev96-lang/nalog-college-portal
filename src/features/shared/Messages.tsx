@@ -78,7 +78,7 @@ export function Messages() {
             {list
               ? list.map((c) => (
                   <button key={c.id} onClick={() => { setActive(c.id); setCompose(false); setQ(""); }} className="flex w-full items-center gap-3 border-b border-line px-4 py-3 text-left hover:bg-page">
-                    <Avatar name={c.name} className="size-9 text-xs" />
+                    <Avatar name={c.name} photo={db.userPhotos[c.id]} className="size-9 text-xs" />
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-semibold text-brand-900">{c.name}</span>
                       <span className="block truncate text-xs text-muted">{c.hint}</span>
@@ -89,7 +89,7 @@ export function Messages() {
                 ? <Empty icon="chat" title="Диалогов пока нет" text="Нажмите «Новое сообщение» и выберите адресата" />
                 : threads.filter(([id, t]) => !tq.trim() || nameOf(db, id).toLowerCase().includes(tq.trim().toLowerCase()) || t.preview.toLowerCase().includes(tq.trim().toLowerCase())).map(([id, t]) => (
                     <button key={id} onClick={() => setActive(id)} className={cx("flex w-full items-center gap-3 border-b border-line px-4 py-3 text-left hover:bg-page", active === id && "bg-brand-50")}>
-                      <Avatar name={nameOf(db, id)} className="size-10 text-xs" />
+                      <Avatar name={nameOf(db, id)} photo={db.userPhotos[id]} className="size-10 text-xs" />
                       <span className="min-w-0 flex-1">
                         <span className="flex items-center justify-between gap-2">
                           <span className="truncate text-sm font-semibold text-brand-900">{nameOf(db, id)}</span>
@@ -111,7 +111,7 @@ export function Messages() {
             <>
               <div className="flex items-center gap-3 border-b border-line px-4 py-3">
                 <button onClick={() => setActive(null)} className="rounded-lg p-1.5 text-brand-800 hover:bg-brand-50 md:hidden" aria-label="Назад"><Icon name="chevronLeft" /></button>
-                <Avatar name={nameOf(db, active)} className="size-9 text-xs" />
+                <Avatar name={nameOf(db, active)} photo={db.userPhotos[active]} className="size-9 text-xs" />
                 <p className="truncate font-semibold text-brand-900">{nameOf(db, active)}</p>
               </div>
               <div className="min-h-0 flex-1 space-y-2 overflow-y-auto bg-page px-4 py-4">

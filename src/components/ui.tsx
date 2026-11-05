@@ -242,7 +242,8 @@ export function AvgBadge({ value, className }: { value: number | null; className
   );
 }
 
-export function Avatar({ name, className }: { name: string; className?: string }) {
+export function Avatar({ name, photo, className }: { name: string; photo?: string; className?: string }) {
+  if (photo) return <img src={photo} alt={name} className={cx("size-10 shrink-0 rounded-full object-cover", className)} />;
   const parts = name.replace("Родитель: ", "").split(" ");
   const initials = (parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "");
   return (

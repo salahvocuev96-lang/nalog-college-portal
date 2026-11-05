@@ -13,6 +13,7 @@ export async function POST(req: Request) {
   if (photo.length > MAX_BYTES) return json({ error: "Файл слишком большой (макс. 300 КБ)" }, 400);
   const c = getContext();
   c.sql.prepare("UPDATE users SET photo = ? WHERE id = ?").run(photo, user.id);
+  c.db.userPhotos[user.id] = photo;
   return json({ ok: true });
 }
 
@@ -22,5 +23,6 @@ export async function DELETE(req: Request) {
   if (!user) return unauthorized();
   const c = getContext();
   c.sql.prepare("UPDATE users SET photo = NULL WHERE id = ?").run(user.id);
+  delete c.db.userPhotos[user.id];
   return json({ ok: true });
 }
