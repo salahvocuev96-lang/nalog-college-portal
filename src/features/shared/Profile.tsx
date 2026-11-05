@@ -62,7 +62,7 @@ export function Profile() {
           </div>
         </div>
         <dl className="grid gap-2 border-t border-line/80 p-4 sm:grid-cols-2 sm:p-5">
-          {rows.map(([k, v]) => (
+          {rows.filter(([, v]) => v).map(([k, v]) => (
             <div key={k} className="lift min-w-0 rounded-xl border border-line/70 bg-page/50 px-4 py-3">
               <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted">{k}</dt>
               <dd className="mt-0.5 text-sm font-semibold text-ink [overflow-wrap:anywhere]">{v || "-"}</dd>
