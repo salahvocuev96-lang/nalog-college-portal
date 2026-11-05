@@ -17,6 +17,7 @@ const paths: Record<string, string> = {
   bell: "M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9M10 20a2 2 0 0 0 4 0",
   logout: "M15 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3M10 16l-4-4 4-4M6 12h10",
   menu: "M4 7h16M4 12h16M4 17h16",
+  camera: "M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8",
   close: "M6 6l12 12M18 6 6 18",
   plus: "M12 5v14M5 12h14",
   send: "M4 12 20 4l-6 16-3-7z",

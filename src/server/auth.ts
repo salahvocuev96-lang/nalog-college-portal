@@ -129,7 +129,8 @@ export function userFromToken(sql: DatabaseSync, db: DB, token: string | undefin
     .prepare("SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ? AND u.active = 1")
     .get(sha(token), Date.now()) as UserRow | undefined;
   if (!row) return null;
-  return { id: row.id, role: row.role, login: row.login, name: personName(db, row.id), mustChangePassword: row.must_change_password === 1 };
+  const photo = (row as UserRow & { photo?: string | null }).photo ?? undefined;
+  return { id: row.id, role: row.role, login: row.login, name: personName(db, row.id), mustChangePassword: row.must_change_password === 1, ...(photo ? { photo } : {}) };
 }
 
 // ---------- Защита от подбора пароля (в памяти процесса) ----------

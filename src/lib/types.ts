@@ -132,6 +132,7 @@ export interface SessionUser {
   name: string;
   login: string;
   mustChangePassword: boolean;
+  photo?: string;
 }
 
 /** Запись журнала аудита. Таблица в БД защищена триггерами от изменения и удаления */
