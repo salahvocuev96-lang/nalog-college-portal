@@ -14,22 +14,16 @@ export default function LoginPage() {
   ];
   return (
     <div className="grid min-h-dvh bg-white lg:grid-cols-[1.05fr_1fr]">
-      <section className="relative hidden overflow-hidden bg-gradient-to-br from-brand-950 via-brand-900 to-brand-700 text-white lg:flex lg:flex-col lg:justify-between lg:p-14">
-        <div className="dots-pattern pointer-events-none absolute inset-0 opacity-50 [mask-image:radial-gradient(ellipse_at_top_right,black,transparent_70%)]" />
-        <div className="pointer-events-none absolute -right-10 top-1/3 size-40 rounded-full border border-gold-400/30" />
-        {/* Золотое кольцо и синий ореол повторяют мотив герба */}
-        <div className="pointer-events-none absolute -right-36 -top-36 size-[560px] rounded-full border-[44px] border-gold-500/15" />
-        <div className="pointer-events-none absolute -bottom-48 -left-24 size-[480px] rounded-full bg-brand-600/30 blur-3xl" />
+      <section className="relative hidden overflow-hidden text-white lg:flex lg:flex-col lg:justify-between lg:p-14">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/nk-logo.jpg" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
+        <div className="pointer-events-none absolute inset-0 bg-brand-950/75" />
         <div className="relative flex items-center gap-4">
           <span className="grid size-16 place-items-center rounded-2xl bg-white p-1.5 shadow-lg"><Crest className="size-14" /></span>
           <div>
             <p className="text-lg font-bold">Налоговый колледж</p>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-400">Education portal</p>
           </div>
-        </div>
-        <div className="relative flex justify-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/nk-logo.jpg" alt="Налоговый колледж" width={200} height={200} className="rounded-3xl bg-white/90 p-4 shadow-2xl" />
         </div>
         <div className="relative max-w-xl stagger">
           <p className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-gold-400 ring-1 ring-white/15"><span className="pulse-dot size-1.5 rounded-full bg-gold-400" />Цифровой колледж</p>
