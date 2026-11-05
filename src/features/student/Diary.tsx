@@ -41,15 +41,15 @@ export function Diary() {
           <input type="date" className={inputCls} value={week} onChange={(e) => e.target.value && setWeek(startOfWeek(e.target.value))} />
         </Field>
       </Card>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 stagger">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {days.map((d, i) => {
           const lessons = groupLessons(db, student.groupId, d).filter((l) => !subjectId || l.subjectId === subjectId);
           const isToday = d === now;
           return (
-            <Card key={d} className={cx("overflow-hidden", isToday && "ring-2 ring-gold-500")}>
-              <div className={cx("flex items-center justify-between px-5 py-3", isToday ? "bg-brand-900 text-white" : "border-b border-line")}>
-                <p className="font-semibold">{WEEKDAYS[i]}</p>
-                <p className={cx("text-sm", isToday ? "text-gold-400" : "text-muted")}>{isToday ? "Сегодня" : formatShort(d)}</p>
+            <Card key={d} className={cx("overflow-hidden", isToday && "border-brand-600 ring-1 ring-brand-600")}>
+              <div className={cx("flex items-center justify-between border-b px-5 py-3", isToday ? "border-brand-100 bg-brand-50" : "border-line")}>
+                <p className="font-semibold text-ink">{WEEKDAYS[i]}<span className="ml-2 text-xs font-normal text-muted">{formatShort(d)}</span></p>
+                {isToday && <span className="rounded bg-brand-700 px-1.5 py-0.5 text-[11px] font-semibold text-white">Сегодня</span>}
               </div>
               {lessons.length === 0 ? <p className="px-5 py-6 text-sm text-muted">Пар нет</p> : (
                 <ul className="divide-y divide-line">

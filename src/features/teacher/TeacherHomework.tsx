@@ -50,7 +50,7 @@ export function TeacherHomework() {
           <Field label="Срок сдачи"><input type="date" value={due} min={issued} onChange={(e) => setDue(e.target.value)} className={inputCls} /></Field>
           <Field label="Описание" className="md:col-span-4"><textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} maxLength={2000} placeholder="Что нужно сделать и как сдать" className={`${inputCls} h-auto py-2`} /></Field>
           <div className="flex flex-wrap items-center gap-3 md:col-span-4">
-            <Button variant="gold" onClick={submit} disabled={!sid || title.trim().length < 3 || busy}>{busy ? "Публикуем…" : "Опубликовать задание"}</Button>
+            <Button variant="brand" onClick={submit} disabled={!sid || title.trim().length < 3 || busy}>{busy ? "Публикуем…" : "Опубликовать задание"}</Button>
             <span className="text-xs text-muted">Вложения файлов появятся в следующей версии</span>
           </div>
         </div>

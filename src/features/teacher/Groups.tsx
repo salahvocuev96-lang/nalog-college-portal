@@ -19,7 +19,7 @@ export function TeacherGroups() {
           {groups.map((g) => {
             const subj = loads.filter((l) => l.groupId === g.id);
             return (
-              <button key={g.id} onClick={() => setOpen(g.id)} className={cx("w-full rounded-2xl border bg-white p-4 text-left shadow-card transition", open === g.id ? "border-gold-500" : "border-line")}>
+              <button key={g.id} onClick={() => setOpen(g.id)} className={cx("w-full rounded-xl border bg-white p-4 text-left shadow-card transition", open === g.id ? "border-gold-500" : "border-line")}>
                 <div className="flex items-center justify-between">
                   <p className="text-lg font-bold text-brand-900">{g.code}</p>
                   <span className="text-xs text-muted">{g.course} курс</span>

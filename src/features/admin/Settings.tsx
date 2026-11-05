@@ -37,7 +37,7 @@ export function AdminSettings() {
           <p className="text-xs text-muted">Это демонстрационные правила. Перед эксплуатацией их нужно привести в соответствие с положением колледжа о текущем контроле и промежуточной аттестации.</p>
         </div>
       </Card>
-      <Button variant="gold" onClick={async () => toastResult(await act("settings.update", s))}>Сохранить настройки</Button>
+      <Button variant="brand" onClick={async () => toastResult(await act("settings.update", s))}>Сохранить настройки</Button>
     </div>
   );
 }

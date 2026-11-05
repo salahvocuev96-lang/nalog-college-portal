@@ -29,7 +29,7 @@ export function TeacherAttendance() {
       <Card className="scroll-x">
         <table className="w-full min-w-[560px] text-sm">
           <thead>
-            <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-muted">
+            <tr className="border-b border-line bg-subtle text-left text-xs font-medium text-muted">
               <th className="px-5 py-3 font-semibold">Студент</th>
               <th className="px-3 py-3 text-center font-semibold">Занятий</th>
               <th className="px-3 py-3 text-center font-semibold">Н</th>

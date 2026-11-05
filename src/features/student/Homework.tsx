@@ -37,13 +37,13 @@ export function StudentHomework() {
         action={<Segmented value={tab} onChange={setTab} options={[{ value: "active", label: `Актуальные · ${count("active")}` }, { value: "overdue", label: `Просрочено · ${count("overdue")}` }, { value: "done", label: "Выполнено" }]} />}
       />
       {shown.length === 0 ? <Card><Empty icon="task" title={tab === "done" ? "Пока ничего не отмечено" : tab === "overdue" ? "Просроченных заданий нет" : "Актуальных заданий нет"} /></Card> : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 stagger">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {shown.map((h) => {
             const meta = HW_STATUS_META[h.status];
             return (
-              <Card key={h.id} className="flex flex-col p-5 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-pop)]">
+              <Card key={h.id} className="flex flex-col p-5 lift">
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gold-700">{subjectName(db, h.subjectId)}</p>
+                  <p className="text-xs font-medium text-muted">{subjectName(db, h.subjectId)}</p>
                   <Badge tone={meta.tone}>{meta.label}</Badge>
                 </div>
                 <p className="mt-2 font-semibold leading-snug text-brand-900">{h.title}</p>

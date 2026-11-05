@@ -52,7 +52,7 @@ export function AdminHome() {
   const maxStudents = Math.max(...byCourse.map((c) => c.students), 1);
 
   return (
-    <div className="space-y-6 stagger">
+    <div className="space-y-6">
       <PageHeader title="Обзор колледжа" subtitle={`${sem.label}, данные на ${db.serverToday.split("-").reverse().join(".")}`} action={<Link href="/announcements/" className="inline-flex h-10 items-center gap-2 rounded-xl bg-brand-800 px-4 text-sm font-semibold text-white hover:bg-brand-700"><Icon name="megaphone" className="size-4" />Объявление</Link>} />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 2xl:grid-cols-6">
         <StatCard label="Студентов" value={db.students.length} icon="users" />
@@ -131,7 +131,7 @@ export function AdminGroups() {
         <Select label="Специальность" value={spec} onChange={(e) => setSpec(e.target.value)}>
           {Object.entries(SPECIALTIES).map(([k, v]) => <option key={k} value={k}>{k} · {v}</option>)}
         </Select>
-        <Button variant="gold" onClick={async () => toastResult(await act("group.create", { course, specialty: spec }))}><Icon name="plus" className="size-4" />Добавить группу</Button>
+        <Button variant="brand" onClick={async () => toastResult(await act("group.create", { course, specialty: spec }))}><Icon name="plus" className="size-4" />Добавить группу</Button>
       </Card>
       <div className="grid gap-6 xl:grid-cols-2">
         {COURSES.map((c) => {
@@ -196,7 +196,7 @@ export function AdminStudents() {
   return (
     <div>
       <PageHeader title="Студенты" subtitle={`${db.students.length} студентов. Данные вымышленные`}
-        action={<div className="flex gap-2"><Button variant="outline" onClick={() => setCsv("")}><Icon name="upload" className="size-4" />Импорт CSV</Button><Button variant="gold" onClick={() => setEdit("new")}><Icon name="plus" className="size-4" />Добавить</Button></div>} />
+        action={<div className="flex gap-2"><Button variant="outline" onClick={() => setCsv("")}><Icon name="upload" className="size-4" />Импорт CSV</Button><Button variant="brand" onClick={() => setEdit("new")}><Icon name="plus" className="size-4" />Добавить</Button></div>} />
       <Card className="mb-4 grid gap-3 p-4 sm:grid-cols-[1fr_200px]">
         <SearchInput value={q} onChange={setQ} placeholder="Поиск по ФИО" />
         <Select value={groupId} onChange={(e) => setGroupId(e.target.value)} aria-label="Группа">
@@ -273,7 +273,7 @@ export function AdminTeachers() {
   const loadsOf = (id: string) => db.loads.filter((l) => l.teacherId === id);
   return (
     <div>
-      <PageHeader title="Преподаватели" subtitle="Список взят из расписания колледжа" action={<Button variant="gold" onClick={() => setEdit("new")}><Icon name="plus" className="size-4" />Добавить</Button>} />
+      <PageHeader title="Преподаватели" subtitle="Список взят из расписания колледжа" action={<Button variant="brand" onClick={() => setEdit("new")}><Icon name="plus" className="size-4" />Добавить</Button>} />
       <Card className="mb-4 p-4"><SearchInput value={q} onChange={setQ} placeholder="Поиск по ФИО" /></Card>
       <Card>
         <DataTable rows={rows} rowKey={(t) => t.id} onRowClick={(t) => setEdit(t)} columns={[
@@ -316,7 +316,7 @@ export function AdminSubjects() {
   const rows = db.subjects.filter((s) => !q.trim() || s.name.toLowerCase().includes(q.trim().toLowerCase()));
   return (
     <div>
-      <PageHeader title="Предметы" subtitle={`${db.subjects.length} дисциплин`} action={<Button variant="gold" onClick={() => setEdit("new")}><Icon name="plus" className="size-4" />Добавить</Button>} />
+      <PageHeader title="Предметы" subtitle={`${db.subjects.length} дисциплин`} action={<Button variant="brand" onClick={() => setEdit("new")}><Icon name="plus" className="size-4" />Добавить</Button>} />
       <Card className="mb-4 p-4"><SearchInput value={q} onChange={setQ} placeholder="Поиск предмета" /></Card>
       <Card>
         <DataTable rows={rows} rowKey={(s) => s.id} onRowClick={(s) => setEdit(s)} columns={[

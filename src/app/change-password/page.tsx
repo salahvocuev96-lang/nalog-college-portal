@@ -48,7 +48,7 @@ export default function ChangePasswordPage() {
           <Field label="Новый пароль" hint="Не короче 8 символов, буквы и цифры"><input type="password" autoComplete="new-password" className={inputCls} value={next} onChange={(e) => setNext(e.target.value)} /></Field>
           <Field label="Повторите пароль"><input type="password" autoComplete="new-password" className={inputCls} value={repeat} onChange={(e) => setRepeat(e.target.value)} /></Field>
           {error && <p role="alert" className="flex items-start gap-2 rounded-xl bg-rose-50 px-3 py-2.5 text-sm text-rose-700"><Icon name="alert" className="mt-px size-4 shrink-0" />{error}</p>}
-          <Button type="submit" variant="gold" className="h-11 w-full" disabled={busy}>{busy ? "Сохраняем…" : "Сохранить пароль"}</Button>
+          <Button type="submit" variant="brand" className="h-11 w-full" disabled={busy}>{busy ? "Сохраняем…" : "Сохранить пароль"}</Button>
           <button type="button" onClick={async () => { if (session?.mustChangePassword) { await logout(); router.replace("/"); } else router.back(); }} className="w-full text-center text-sm text-muted hover:text-brand-800">
             {session?.mustChangePassword ? "Выйти" : "Отмена"}
           </button>

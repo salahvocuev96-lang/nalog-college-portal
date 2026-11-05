@@ -3,12 +3,32 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { loadSession, logout, markNotificationsRead, useStore } from "@/lib/store";
-import { NAV, ROLE_LABEL } from "@/lib/nav";
-import { formatTime, formatWithWeekday, today } from "@/lib/dates";
+import { NAV, ROLE_LABEL, type NavItem } from "@/lib/nav";
+import { formatTime } from "@/lib/dates";
 import { Icon } from "./icons";
 import { Avatar, cx } from "./ui";
 import { Crest } from "./Crest";
 import { PageSkeleton, Toaster } from "./feedback";
+
+function useOutside<T extends HTMLElement>(onOut: () => void) {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    const close = (e: MouseEvent) => ref.current && !ref.current.contains(e.target as Node) && onOut();
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [onOut]);
+  return ref;
+}
+
+/** Группы меню: заголовок раздела и его пункты */
+function sections(items: NavItem[]) {
+  const out: { title?: string; items: NavItem[] }[] = [];
+  for (const it of items) {
+    if (it.section || !out.length) out.push({ title: it.section, items: [] });
+    out[out.length - 1].items.push(it);
+  }
+  return out;
+}
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { session, status } = useStore();
@@ -30,123 +50,176 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   if (status !== "ready" || !session || session.mustChangePassword)
     return (
-      <div className="min-h-dvh lg:pl-72">
-        <aside className="fixed inset-y-0 left-0 hidden w-72 bg-brand-900 lg:block" />
-        <main className="mx-auto max-w-7xl px-4 pt-24 md:px-8"><PageSkeleton /></main>
+      <div className="min-h-dvh lg:pl-64">
+        <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-line bg-white lg:block" />
+        <main className="mx-auto max-w-7xl px-4 pt-20 md:px-8"><PageSkeleton /></main>
       </div>
     );
   const items = NAV[session.role];
   const isActive = (href: string) => path === href || path === href.slice(0, -1) || path.startsWith(href);
+  const current = items.find((it) => isActive(it.href));
+  const currentSection = current && [...items.slice(0, items.indexOf(current) + 1)].reverse().find((it) => it.section)?.section;
   const onLogout = async () => {
     await logout();
     router.replace("/");
   };
-  const mobileMain = items.slice(0, 4);
-  const mobileMore = items.slice(4);
+  const pinned = items.filter((it) => it.pin).slice(0, 4);
+  const rest = items.filter((it) => !pinned.includes(it));
 
   return (
-    <div className="min-h-dvh lg:pl-72">
-      {/* Сайдбар для компьютера */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 flex-col overflow-hidden bg-gradient-to-b from-brand-900 via-brand-900 to-brand-950 text-white lg:flex">
-        <div className="dots-pattern pointer-events-none absolute inset-0 opacity-40 [mask-image:linear-gradient(to_bottom,transparent,black_70%)]" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 size-72 rounded-full border-[26px] border-gold-500/[0.09]" />
-        <div className="pointer-events-none absolute -right-20 top-24 size-48 rounded-full bg-brand-500/20 blur-3xl" />
-        <div className="relative flex items-center gap-3 border-b border-white/10 px-6 py-5">
-          <span className="grid size-12 place-items-center rounded-xl bg-white p-1 shadow-[0_6px_18px_-6px_rgb(229_169_26/0.6)] ring-2 ring-gold-500/40"><Crest className="size-10" /></span>
+    <div className="min-h-dvh lg:pl-64">
+      {/* Боковое меню для компьютера */}
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line bg-white lg:flex">
+        <Link href="/home/" className="flex h-16 items-center gap-3 border-b border-line px-5">
+          <Crest className="size-9" />
           <div className="leading-tight">
-            <p className="text-[15px] font-bold tracking-wide">Налоговый колледж</p>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-400">Education portal</p>
+            <p className="text-[14px] font-bold text-brand-900">Налоговый колледж</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gold-600">Education portal</p>
           </div>
-        </div>
-        <nav className="relative flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {items.map((it) => (
-            <Link
-              key={it.href}
-              href={it.href}
-              className={cx(
-                "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium transition-all duration-200",
-                isActive(it.href) ? "bg-gradient-to-r from-white/15 to-white/[0.03] text-white shadow-[inset_3px_0_0_var(--color-gold-500)]" : "text-white/65 hover:translate-x-0.5 hover:bg-white/[0.06] hover:text-white",
-              )}
-            >
-              <Icon name={it.icon} className={cx("size-[19px] transition-colors", isActive(it.href) ? "text-gold-400" : "")} />
-              <span className="flex-1">{it.label}</span>
-              <NavCounter href={it.href} />
-            </Link>
+        </Link>
+        <nav className="flex-1 overflow-y-auto px-3 py-3" aria-label="Основное меню">
+          {sections(items).map((sec, i) => (
+            <div key={i} className={cx(i > 0 && "mt-4")}>
+              {sec.title && <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted/80">{sec.title}</p>}
+              <ul className="space-y-0.5">
+                {sec.items.map((it) => {
+                  const active = isActive(it.href);
+                  return (
+                    <li key={it.href}>
+                      <Link
+                        href={it.href}
+                        aria-current={active ? "page" : undefined}
+                        className={cx(
+                          "relative flex h-9 items-center gap-3 rounded-md px-3 text-[14px] transition-colors duration-150",
+                          active ? "bg-brand-50 font-semibold text-brand-800" : "text-slate-600 hover:bg-subtle hover:text-ink",
+                        )}
+                      >
+                        {active && <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-r bg-brand-700" />}
+                        <Icon name={it.icon} className={cx("size-[18px] shrink-0", active ? "text-brand-700" : "text-slate-400")} />
+                        <span className="flex-1 truncate">{it.label}</span>
+                        <NavCounter href={it.href} />
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           ))}
         </nav>
-        <div className="relative border-t border-white/10 p-4">
-          <div className="flex items-center gap-3 rounded-xl bg-white/[0.07] p-3 ring-1 ring-white/10">
-            <Avatar name={session.name} className="bg-gold-500 text-brand-950" />
+        <div className="border-t border-line p-3">
+          <div className="flex items-center gap-3 rounded-md px-2 py-2">
+            <Avatar name={session.name} className="size-9 text-[13px]" />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{session.name}</p>
-              <p className="text-xs text-white/60">{ROLE_LABEL[session.role]}</p>
+              <p className="truncate text-[13px] font-semibold text-ink">{session.name}</p>
+              <p className="truncate text-xs text-muted">{ROLE_LABEL[session.role]}</p>
             </div>
-            <button onClick={onLogout} title="Выйти" aria-label="Выйти" className="rounded-lg p-2 text-white/60 hover:bg-white/10 hover:text-white">
+            <button onClick={onLogout} title="Выйти" aria-label="Выйти" className="grid size-8 place-items-center rounded-md text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600">
               <Icon name="logout" className="size-[18px]" />
             </button>
           </div>
         </div>
       </aside>
 
-      {/* Шапка */}
-      <header className="sticky top-0 z-20 border-b border-line/70 bg-white/80 shadow-[0_1px_12px_-4px_rgb(10_33_72/0.12)] backdrop-blur-xl">
-        <div className="flex h-16 items-center gap-3 px-4 md:px-8">
-          <Link href="/home/" className="flex items-center gap-2.5 lg:hidden">
-            <Crest className="size-9" />
-            <span className="text-[15px] font-bold text-brand-900">Налоговый колледж</span>
+      {/* Верхняя панель */}
+      <header className="sticky top-0 z-20 border-b border-line bg-white/95 backdrop-blur">
+        <div className="flex h-14 items-center gap-3 px-4 md:px-8 lg:h-16">
+          <Link href="/home/" className="flex min-w-0 items-center gap-2.5 lg:hidden">
+            <Crest className="size-8" />
+            <span className="truncate text-[15px] font-bold text-brand-900">{current?.short ?? "Налоговый колледж"}</span>
           </Link>
-          <p className="hidden text-sm text-muted lg:block">{formatWithWeekday(today())}</p>
-          <div className="ml-auto flex items-center gap-2">
-            <span className="hidden rounded-full bg-gold-50 px-3 py-1 text-xs font-semibold text-gold-600 ring-1 ring-gold-100 sm:inline">Демо-версия</span>
+          <nav aria-label="Вы здесь" className="hidden min-w-0 items-center gap-1.5 text-sm lg:flex">
+            <span className="text-muted">{ROLE_LABEL[session.role]}</span>
+            {currentSection && <><Icon name="chevronRight" className="size-3.5 text-slate-300" /><span className="text-muted">{currentSection}</span></>}
+            {current && <><Icon name="chevronRight" className="size-3.5 text-slate-300" /><span className="truncate font-semibold text-ink">{current.label}</span></>}
+          </nav>
+          <div className="ml-auto flex items-center gap-1 sm:gap-2">
+            <span className="hidden rounded-md bg-gold-50 px-2 py-1 text-xs font-semibold text-gold-700 sm:inline">Демо-версия</span>
             <Bell />
+            <UserMenu name={session.name} role={ROLE_LABEL[session.role]} onLogout={onLogout} />
           </div>
         </div>
       </header>
 
-      <main key={path} className="mx-auto max-w-7xl animate-enter px-4 pb-28 pt-6 md:px-8 lg:pb-12">{children}</main>
+      <main key={path} className="mx-auto max-w-7xl animate-enter px-4 pb-28 pt-5 md:px-8 md:pt-7 lg:pb-12">{children}</main>
       <Toaster />
 
       {/* Нижнее меню для телефона и планшета */}
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-line/70 bg-white/85 shadow-[0_-8px_30px_-12px_rgb(10_33_72/0.25)] backdrop-blur-xl lg:hidden">
+      <nav aria-label="Быстрое меню" className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white lg:hidden">
         <div className="grid grid-cols-5">
-          {mobileMain.map((it) => (
-            <Link key={it.href} href={it.href} className={cx("flex min-h-[60px] flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors", isActive(it.href) ? "text-brand-800" : "text-muted")}>
-              <span className={cx("relative grid h-8 w-12 place-items-center rounded-2xl transition-all duration-200", isActive(it.href) ? "-translate-y-0.5 bg-gradient-to-b from-brand-600 to-brand-900 shadow-[0_6px_14px_-6px_rgb(18_48_106/0.8)]" : "active:scale-90")}>
-                <Icon name={it.icon} className={cx("size-[20px] transition-colors", isActive(it.href) ? "text-white" : "")} />
-                <NavCounter href={it.href} />
-              </span>
-              <span className={cx("max-w-full truncate px-1", isActive(it.href) && "font-semibold")}>{it.short}</span>
-            </Link>
-          ))}
-          <button onClick={() => setMore((v) => !v)} aria-expanded={more} className={cx("flex min-h-[60px] flex-col items-center justify-center gap-0.5 text-[11px] font-medium", more ? "text-brand-800" : "text-muted")}>
-            <span className={cx("grid h-8 w-12 place-items-center rounded-2xl transition-all duration-200", more ? "bg-gradient-to-b from-brand-700 to-brand-900 shadow-sm" : "")}><Icon name="menu" className={cx("size-[20px]", more ? "text-white" : "")} /></span>
-            <span className={cx(more && "font-semibold")}>Ещё</span>
+          {pinned.map((it) => {
+            const active = isActive(it.href);
+            return (
+              <Link key={it.href} href={it.href} aria-current={active ? "page" : undefined} className={cx("relative flex min-h-[58px] flex-col items-center justify-center gap-1 text-[11px] transition-colors", active ? "font-semibold text-brand-800" : "text-muted")}>
+                {active && <span className="absolute inset-x-5 top-0 h-[3px] rounded-b bg-brand-700" />}
+                <span className="relative">
+                  <Icon name={it.icon} className={cx("size-[22px]", active ? "text-brand-700" : "text-slate-400")} />
+                  <span className="absolute -right-2.5 -top-1.5"><NavCounter href={it.href} compact /></span>
+                </span>
+                <span className="max-w-full truncate px-1">{it.short}</span>
+              </Link>
+            );
+          })}
+          <button onClick={() => setMore((v) => !v)} aria-expanded={more} className={cx("relative flex min-h-[58px] flex-col items-center justify-center gap-1 text-[11px]", more ? "font-semibold text-brand-800" : "text-muted")}>
+            {more && <span className="absolute inset-x-5 top-0 h-[3px] rounded-b bg-brand-700" />}
+            <Icon name="menu" className={cx("size-[22px]", more ? "text-brand-700" : "text-slate-400")} />
+            <span>Ещё</span>
           </button>
         </div>
       </nav>
       {more && (
-        <div className="fixed inset-0 z-20 animate-fade bg-brand-950/45 backdrop-blur-[2px] lg:hidden" onClick={() => setMore(false)}>
-          <div className="safe-bottom absolute inset-x-0 bottom-[61px] max-h-[75dvh] animate-sheet overflow-y-auto rounded-t-3xl bg-white p-4 pt-3 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-line" />
-            <div className="mb-3 flex items-center gap-3 rounded-2xl bg-gradient-to-br from-brand-900 to-brand-700 p-3 text-white">
-              <Avatar name={session.name} className="bg-gold-500 text-brand-950" />
+        <div className="fixed inset-0 z-20 animate-fade bg-slate-900/40 lg:hidden" onClick={() => setMore(false)}>
+          <div className="safe-bottom absolute inset-x-0 bottom-[58px] max-h-[75dvh] animate-sheet overflow-y-auto rounded-t-2xl bg-white pb-2 shadow-[var(--shadow-pop)]" onClick={(e) => e.stopPropagation()}>
+            <div className="mx-auto mb-1 mt-2 h-1 w-10 rounded-full bg-slate-200" />
+            <div className="flex items-center gap-3 border-b border-line px-4 py-3">
+              <Avatar name={session.name} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">{session.name}</p>
-                <p className="text-xs text-white/60">{ROLE_LABEL[session.role]}</p>
+                <p className="truncate text-sm font-semibold text-ink">{session.name}</p>
+                <p className="text-xs text-muted">{ROLE_LABEL[session.role]}</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              {mobileMore.map((it) => (
-                <Link key={it.href} href={it.href} className={cx("flex items-center gap-2.5 rounded-xl border border-line px-3 py-3 text-sm font-medium transition-all active:scale-[0.97]", isActive(it.href) ? "border-gold-500 bg-gold-50 text-brand-900" : "text-ink")}>
-                  <Icon name={it.icon} className="size-5 text-gold-600" />
-                  {it.label}
-                </Link>
+            <ul className="py-1">
+              {rest.map((it) => (
+                <li key={it.href}>
+                  <Link href={it.href} className={cx("flex h-12 items-center gap-3 px-4 text-[15px]", isActive(it.href) ? "bg-brand-50 font-semibold text-brand-800" : "text-ink active:bg-subtle")}>
+                    <Icon name={it.icon} className="size-5 text-slate-400" />
+                    <span className="flex-1">{it.label}</span>
+                    <NavCounter href={it.href} />
+                  </Link>
+                </li>
               ))}
-              <button onClick={onLogout} className="flex items-center gap-2.5 rounded-xl border border-line px-3 py-3 text-sm font-medium text-rose-600">
-                <Icon name="logout" className="size-5" />
-                Выйти
-              </button>
-            </div>
+              <li className="mt-1 border-t border-line pt-1">
+                <button onClick={onLogout} className="flex h-12 w-full items-center gap-3 px-4 text-[15px] text-rose-600 active:bg-rose-50">
+                  <Icon name="logout" className="size-5" />
+                  Выйти
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function UserMenu({ name, role, onLogout }: { name: string; role: string; onLogout: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useOutside<HTMLDivElement>(() => setOpen(false));
+  return (
+    <div className="relative hidden lg:block" ref={ref}>
+      <button onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-label="Меню пользователя" className="flex items-center gap-2 rounded-md py-1 pl-1 pr-2 transition-colors hover:bg-subtle">
+        <Avatar name={name} className="size-8 text-xs" />
+        <Icon name="chevronRight" className={cx("size-3.5 text-muted transition-transform", open ? "-rotate-90" : "rotate-90")} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-12 w-64 origin-top-right animate-pop overflow-hidden rounded-lg border border-line bg-white shadow-[var(--shadow-pop)]">
+          <div className="border-b border-line px-4 py-3">
+            <p className="truncate text-sm font-semibold text-ink">{name}</p>
+            <p className="text-xs text-muted">{role}</p>
+          </div>
+          <div className="py-1 text-sm">
+            <Link href="/profile/" onClick={() => setOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-ink hover:bg-subtle"><Icon name="user" className="size-4 text-slate-400" />Профиль</Link>
+            <Link href="/change-password/" onClick={() => setOpen(false)} className="flex items-center gap-2.5 px-4 py-2 text-ink hover:bg-subtle"><Icon name="key" className="size-4 text-slate-400" />Сменить пароль</Link>
+            <button onClick={onLogout} className="flex w-full items-center gap-2.5 border-t border-line px-4 py-2 text-rose-600 hover:bg-rose-50"><Icon name="logout" className="size-4" />Выйти</button>
           </div>
         </div>
       )}
@@ -157,43 +230,37 @@ export function AppShell({ children }: { children: ReactNode }) {
 function Bell() {
   const { db, session } = useStore();
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const close = (e: MouseEvent) => ref.current && !ref.current.contains(e.target as Node) && setOpen(false);
-    document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
-  }, []);
+  const ref = useOutside<HTMLDivElement>(() => setOpen(false));
   if (!session) return null;
   const list = db.notifications.filter((n) => n.userId === session.id).sort((a, b) => b.at - a.at);
   const unread = list.filter((n) => !n.read).length;
-  const kindIcon = KIND_ICON;
 
   return (
     <div className="relative" ref={ref}>
-      <button onClick={() => setOpen((v) => !v)} className="relative grid size-10 place-items-center rounded-xl text-brand-800 hover:bg-brand-50" aria-label="Уведомления">
-        <Icon name="bell" />
-        {unread > 0 && <span className="absolute right-1.5 top-1.5 grid min-w-[18px] place-items-center rounded-full bg-gold-500 px-1 text-[10px] font-bold leading-[18px] text-brand-950">{unread}</span>}
+      <button onClick={() => setOpen((v) => !v)} aria-expanded={open} className={cx("relative grid size-10 place-items-center rounded-md transition-colors hover:bg-subtle", open ? "bg-subtle text-brand-800" : "text-slate-500")} aria-label={unread ? `Уведомления, непрочитанных: ${unread}` : "Уведомления"}>
+        <Icon name="bell" className="size-5" />
+        {unread > 0 && <span className="absolute right-1 top-1 grid min-w-[18px] place-items-center rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-[18px] text-white ring-2 ring-white">{unread > 99 ? "99+" : unread}</span>}
       </button>
       {open && (
-        <div className="absolute right-0 top-12 w-[min(92vw,380px)] origin-top-right animate-pop overflow-hidden rounded-2xl border border-line bg-white shadow-[var(--shadow-pop)]">
+        <div className="fixed inset-x-3 top-16 origin-top-right animate-pop overflow-hidden rounded-lg border border-line bg-white shadow-[var(--shadow-pop)] sm:absolute sm:inset-x-auto sm:right-0 sm:top-12 sm:w-[380px]">
           <div className="flex items-center justify-between border-b border-line px-4 py-3">
-            <p className="text-sm font-semibold text-brand-900">Уведомления</p>
-            {unread > 0 && <button onClick={() => markNotificationsRead()} className="text-xs font-semibold text-gold-600">Прочитать все</button>}
+            <p className="text-sm font-semibold text-ink">Уведомления</p>
+            {unread > 0 && <button onClick={() => markNotificationsRead()} className="text-xs font-semibold text-brand-700 hover:underline">Прочитать все</button>}
           </div>
           <div className="max-h-96 overflow-y-auto">
             {list.length === 0 && <p className="px-4 py-8 text-center text-sm text-muted">Новых уведомлений нет</p>}
             {list.slice(0, 8).map((n) => (
-              <Link key={n.id} href={n.href} onClick={() => { setOpen(false); if (!n.read) markNotificationsRead(n.id); }} className={cx("flex gap-3 border-b border-line px-4 py-3 last:border-0 hover:bg-page", !n.read && "bg-gold-50/60")}>
-                <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-700"><Icon name={kindIcon[n.kind]} className="size-4" /></span>
-                <span className="min-w-0">
-                  <span className="block text-[13px] font-semibold text-brand-900">{n.title}</span>
+              <Link key={n.id} href={n.href} onClick={() => { setOpen(false); if (!n.read) markNotificationsRead(n.id); }} className={cx("flex gap-3 border-b border-line px-4 py-3 last:border-0 hover:bg-subtle", !n.read && "bg-brand-50/50")}>
+                <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-md bg-slate-100 text-slate-600"><Icon name={KIND_ICON[n.kind]} className="size-4" /></span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-2 text-[13px] font-semibold text-ink"><span className="truncate">{n.title}</span>{!n.read && <span className="size-1.5 shrink-0 rounded-full bg-brand-600" />}</span>
                   <span className="block truncate text-[13px] text-muted">{n.text}</span>
                   <span className="text-[11px] text-muted/80">{formatTime(n.at)}</span>
                 </span>
               </Link>
             ))}
           </div>
-          <Link href="/notifications/" onClick={() => setOpen(false)} className="block border-t border-line px-4 py-3 text-center text-[13px] font-semibold text-brand-700 hover:bg-page">Все уведомления</Link>
+          <Link href="/notifications/" onClick={() => setOpen(false)} className="block border-t border-line px-4 py-2.5 text-center text-[13px] font-semibold text-brand-700 hover:bg-subtle">Все уведомления</Link>
         </div>
       )}
     </div>
@@ -203,12 +270,12 @@ function Bell() {
 export const KIND_ICON = { grade: "star", grade_change: "edit", message: "chat", homework: "task", attendance: "check", schedule: "calendar", announcement: "megaphone" } as const;
 
 /** Счётчик непрочитанного рядом с пунктом меню */
-function NavCounter({ href }: { href: string }) {
+function NavCounter({ href, compact }: { href: string; compact?: boolean }) {
   const { db, session } = useStore();
   if (!session) return null;
   let n = 0;
   if (href === "/messages/") n = db.messages.filter((m) => m.to === session.id && !m.read).length;
   if (href === "/notifications/") n = db.notifications.filter((x) => x.userId === session.id && !x.read).length;
   if (!n) return null;
-  return <span className="grid min-w-5 place-items-center rounded-full bg-gold-500 px-1.5 text-[11px] font-bold leading-5 text-brand-950">{n > 99 ? "99+" : n}</span>;
+  return <span className={cx("grid min-w-5 place-items-center rounded-full bg-rose-500 px-1.5 font-bold text-white", compact ? "text-[10px] leading-4 ring-2 ring-white" : "text-[11px] leading-5")}>{n > 99 ? "99+" : n}</span>;
 }

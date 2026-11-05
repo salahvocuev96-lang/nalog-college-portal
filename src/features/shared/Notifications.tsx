@@ -48,7 +48,7 @@ export function NotificationsCenter() {
             {list.map((n) => (
               <li key={n.id}>
                 <Link href={n.href} onClick={() => !n.read && markNotificationsRead(n.id)} className={cx("flex gap-3 px-5 py-4 transition hover:bg-page", !n.read && "bg-gold-50/50")}>
-                  <span className={cx("mt-0.5 grid size-10 shrink-0 place-items-center rounded-xl", n.kind === "announcement" ? "bg-brand-900 text-gold-400" : "bg-brand-50 text-brand-700")}>
+                  <span className={cx("mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg", n.kind === "announcement" ? "bg-gold-50 text-gold-700" : "bg-slate-100 text-slate-600")}>
                     <Icon name={KIND_ICON[n.kind]} className="size-[18px]" />
                   </span>
                   <span className="min-w-0 flex-1">

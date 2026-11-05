@@ -81,7 +81,7 @@ export function LoginForm({ demo }: { demo: boolean }) {
       </form>
 
       {demo && (
-        <div className="mt-8 rounded-2xl border border-gold-200 bg-gradient-to-br from-gold-50 to-white p-4 shadow-sm">
+        <div className="mt-8 rounded-xl border border-line bg-subtle p-4">
           <p className="text-sm font-semibold text-brand-900">Демонстрационный вход</p>
           <p className="mt-0.5 text-xs text-muted">Открыть кабинет без пароля. В рабочей версии этот блок отключается</p>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -90,12 +90,12 @@ export function LoginForm({ demo }: { demo: boolean }) {
                 key={d.login}
                 disabled={!!busy}
                 onClick={async () => { setBusy(d.login); setError(""); done(await demoLogin(d.login)); }}
-                className="group flex flex-col items-start rounded-xl border border-line bg-white p-3 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-gold-500 hover:shadow-[0_12px_24px_-12px_rgb(10_33_72/0.35)] active:scale-[0.97] disabled:opacity-60"
+                className="group flex flex-col items-start rounded-lg border border-line bg-white p-3 text-left transition-colors duration-150 hover:border-brand-600 hover:bg-brand-50/40 disabled:opacity-60"
               >
-                <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-brand-600 to-brand-900 text-white shadow-sm transition-transform duration-200 group-hover:scale-110 group-hover:text-gold-400">
+                <span className="grid size-8 place-items-center rounded-md bg-brand-50 text-brand-700 transition-colors group-hover:bg-brand-700 group-hover:text-white">
                   <Icon name={d.icon} className="size-[18px]" />
                 </span>
-                <span className="mt-2 text-[13px] font-semibold text-brand-900">{busy === d.login ? "Входим…" : d.title}</span>
+                <span className="mt-2 text-[13px] font-semibold text-ink">{busy === d.login ? "Входим…" : d.title}</span>
                 <span className="text-[11px] leading-tight text-muted">{d.text}</span>
               </button>
             ))}

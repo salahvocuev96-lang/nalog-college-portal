@@ -32,7 +32,7 @@ export function AdminAnnouncements() {
         </Select>
         <Field label="Заголовок"><input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} /></Field>
         <Field label="Текст"><textarea className={`${inputCls} h-auto py-2`} rows={4} value={text} onChange={(e) => setText(e.target.value)} maxLength={1000} /></Field>
-        <Button variant="gold" onClick={send} disabled={title.trim().length < 3 || text.trim().length < 3}>Отправить</Button>
+        <Button variant="brand" onClick={send} disabled={title.trim().length < 3 || text.trim().length < 3}>Отправить</Button>
       </Card>
       <Card>
         <CardHeader icon="megaphone" title="Отправленные" />

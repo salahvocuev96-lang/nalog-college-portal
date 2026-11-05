@@ -34,7 +34,7 @@ export function AdminAccounts() {
     if (await confirm.ask("Выдать временный пароль?", `Текущий пароль ${a.name} перестанет работать, все сеансы завершатся. При входе потребуется сменить пароль.`, { confirm: "Выдать" })) run("account.resetPassword", { id: a.id, requestId });
   };
 
-  if (!data) return <div className="space-y-4"><Skeleton className="h-9 w-56" /><Skeleton className="h-80 rounded-2xl" /></div>;
+  if (!data) return <div className="space-y-4"><Skeleton className="h-9 w-56" /><Skeleton className="h-80 rounded-xl" /></div>;
   const t = q.trim().toLowerCase();
   const rows = data.accounts.filter((a) => !t || a.name.toLowerCase().includes(t) || a.login.includes(t));
   const open = data.requests.filter((r) => r.status === "open");
@@ -42,7 +42,7 @@ export function AdminAccounts() {
   return (
     <div>
       <PageHeader title="Аккаунты" subtitle="Учётные записи создаёт только учебная часть. Пользователь меняет временный пароль при первом входе"
-        action={<Button variant="gold" onClick={() => setCreate(true)}><Icon name="plus" className="size-4" />Выдать доступ</Button>} />
+        action={<Button variant="brand" onClick={() => setCreate(true)}><Icon name="plus" className="size-4" />Выдать доступ</Button>} />
       {open.length > 0 && (
         <Card className="mb-6 border-gold-500/50">
           <CardHeader icon="key" title={`Заявки на восстановление пароля · ${open.length}`} />

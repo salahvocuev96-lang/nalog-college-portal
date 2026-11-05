@@ -74,7 +74,7 @@ export function AuditLog() {
       <Card>
         {list.length === 0 ? <Empty icon="history" title="Записей нет" /> : (
           <>
-            <div className="hidden grid-cols-[150px_200px_190px_1fr] gap-4 border-b border-line px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted lg:grid">
+            <div className="hidden grid-cols-[150px_200px_190px_1fr] gap-4 border-b border-line bg-subtle px-5 py-2.5 text-xs font-medium text-muted lg:grid">
               <span>Время</span><span>Кто</span><span>Действие</span><span>Подробности</span>
             </div>
             <ul className="divide-y divide-line">

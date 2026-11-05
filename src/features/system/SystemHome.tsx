@@ -39,12 +39,12 @@ export function SystemHome() {
 
   if (!h)
     return (
-      <div className="space-y-6"><Skeleton className="h-9 w-72" /><div className="grid grid-cols-2 gap-4 lg:grid-cols-4">{[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}</div><Skeleton className="h-64 rounded-2xl" /></div>
+      <div className="space-y-6"><Skeleton className="h-9 w-72" /><div className="grid grid-cols-2 gap-4 lg:grid-cols-4">{[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-28 rounded-xl" />)}</div><Skeleton className="h-64 rounded-xl" /></div>
     );
 
   const up = `${Math.floor(h.uptimeSec / 3600)} ч ${Math.floor((h.uptimeSec % 3600) / 60)} мин`;
   return (
-    <div className="space-y-6 stagger">
+    <div className="space-y-6">
       <PageHeader
         title="Состояние системы"
         subtitle="Мониторинг, база данных и резервное копирование. Учебные данные этой роли недоступны"
@@ -58,7 +58,7 @@ export function SystemHome() {
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader icon="database" title="Резервные копии" action={<Button variant="gold" className="h-9" disabled={busy} onClick={backup}>{busy ? "Создаём…" : "Создать копию"}</Button>} />
+          <CardHeader icon="database" title="Резервные копии" action={<Button variant="brand" className="h-9" disabled={busy} onClick={backup}>{busy ? "Создаём…" : "Создать копию"}</Button>} />
           {h.backups.length === 0 ? <Empty icon="database" title="Копий пока нет" text="Создайте первую копию. Для эксплуатации нужно настроить автоматическое копирование по расписанию (см. docs/OPERATIONS.md)" /> : (
             <ul className="divide-y divide-line">
               {h.backups.slice(0, 8).map((b) => (

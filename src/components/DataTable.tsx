@@ -40,11 +40,11 @@ export function DataTable<T>({ rows, columns, rowKey, empty = "Ничего не
       <div className="hidden md:block scroll-x">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-line bg-gradient-to-b from-brand-50/80 to-brand-50/30 text-left text-[11px] uppercase tracking-wider text-brand-800/70">
+            <tr className="border-b border-line bg-subtle text-left text-xs font-medium text-muted">
               {columns.map((c) => (
-                <th key={c.key} className={cx("px-4 py-3 font-semibold first:pl-5", c.className)}>
+                <th key={c.key} className={cx("h-10 px-4 font-medium first:pl-5", c.className)}>
                   {c.sort ? (
-                    <button onClick={() => setSort((s) => (s?.key === c.key ? { key: c.key, dir: s.dir === 1 ? -1 : 1 } : { key: c.key, dir: 1 }))} className="inline-flex items-center gap-1 uppercase hover:text-brand-800" aria-label={`Сортировать: ${c.label}`}>
+                    <button onClick={() => setSort((s) => (s?.key === c.key ? { key: c.key, dir: s.dir === 1 ? -1 : 1 } : { key: c.key, dir: 1 }))} className="inline-flex items-center gap-1 hover:text-ink" aria-label={`Сортировать: ${c.label}`}>
                       {c.label}
                       <Icon name={sort?.key === c.key && sort.dir === -1 ? "chevronLeft" : "chevronRight"} className={cx("size-3 rotate-90 transition", sort?.key !== c.key && "opacity-30")} />
                     </button>
@@ -53,9 +53,9 @@ export function DataTable<T>({ rows, columns, rowKey, empty = "Ничего не
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-line/70">
+          <tbody className="divide-y divide-line">
             {shown.map((r) => (
-              <tr key={rowKey(r)} onClick={onRowClick && (() => onRowClick(r))} className={cx("transition-colors duration-150 odd:bg-white even:bg-page/40 hover:bg-gold-50/50", onRowClick && "cursor-pointer")}>
+              <tr key={rowKey(r)} onClick={onRowClick && (() => onRowClick(r))} className={cx("transition-colors duration-100 hover:bg-subtle", onRowClick && "cursor-pointer")}>
                 {columns.map((c) => <td key={c.key} className={cx("px-4 py-3 first:pl-5", c.className)}>{c.render(r)}</td>)}
               </tr>
             ))}
@@ -64,9 +64,9 @@ export function DataTable<T>({ rows, columns, rowKey, empty = "Ничего не
       </div>
       <ul className="space-y-2 p-3 md:hidden">
         {shown.map((r) => (
-          <li key={rowKey(r)} onClick={onRowClick && (() => onRowClick(r))} className={cx("rounded-2xl border border-line/80 bg-white px-4 py-3.5 shadow-sm transition", onRowClick && "active:scale-[0.99] active:bg-page")}>
-            <div className="text-sm font-semibold text-brand-900">{primary.render(r)}</div>
-            <dl className="mt-2 grid border-t border-line/60 pt-2 grid-cols-2 gap-x-3 gap-y-1 text-xs">
+          <li key={rowKey(r)} onClick={onRowClick && (() => onRowClick(r))} className={cx("rounded-lg border border-line bg-white px-4 py-3 transition-colors", onRowClick && "active:bg-subtle")}>
+            <div className="text-sm font-semibold text-ink">{primary.render(r)}</div>
+            <dl className="mt-2 grid border-t border-line pt-2 grid-cols-2 gap-x-3 gap-y-1 text-xs">
               {columns.filter((c) => c !== primary).map((c) => (
                 c.label
                   ? <div key={c.key} className="min-w-0"><dt className="text-muted">{c.label}</dt><dd className="truncate text-ink">{c.render(r)}</dd></div>
@@ -77,7 +77,7 @@ export function DataTable<T>({ rows, columns, rowKey, empty = "Ничего не
         ))}
       </ul>
       {sorted.length > limit && (
-        <button onClick={() => setLimit((l) => l + pageSize)} className="w-full border-t border-line py-3 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-50">
+        <button onClick={() => setLimit((l) => l + pageSize)} className="w-full border-t border-line py-2.5 text-sm font-medium text-brand-700 transition-colors hover:bg-subtle">
           Показать ещё ({sorted.length - limit})
         </button>
       )}

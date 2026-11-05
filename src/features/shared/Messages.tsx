@@ -70,7 +70,7 @@ export function Messages() {
             ) : (
               <div className="flex w-full gap-2">
                 <SearchInput value={tq} onChange={setTq} placeholder="Поиск диалога" className="flex-1" />
-                <Button variant="gold" onClick={() => setCompose(true)} aria-label="Новое сообщение" title="Новое сообщение"><Icon name="plus" className="size-4" /></Button>
+                <Button variant="brand" onClick={() => setCompose(true)} aria-label="Новое сообщение" title="Новое сообщение"><Icon name="plus" className="size-4" /></Button>
               </div>
             )}
           </div>
@@ -130,7 +130,7 @@ export function Messages() {
                 {err && <p className="mb-2 text-xs text-rose-600">{err}</p>}
                 <div className="flex gap-2">
                   <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Сообщение" className={inputCls} />
-                  <Button variant="gold" type="submit" disabled={!text.trim() || sending} aria-label="Отправить"><Icon name="send" className="size-4" /></Button>
+                  <Button variant="brand" type="submit" disabled={!text.trim() || sending} aria-label="Отправить"><Icon name="send" className="size-4" /></Button>
                 </div>
               </form>
             </>

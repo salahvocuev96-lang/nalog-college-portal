@@ -165,7 +165,7 @@ export function Journal() {
               <Button variant="outline" className="h-9" onClick={() => students.forEach((s) => setDraftField(s.id, { attendance: "present" }))}>Все присутствуют</Button>
             </div>
           )}
-          <div className="hidden grid-cols-[28px_minmax(0,1fr)_auto_auto_70px] items-center gap-4 border-b border-line px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted md:grid">
+          <div className="hidden grid-cols-[28px_minmax(0,1fr)_auto_auto_70px] items-center gap-4 border-b border-line bg-subtle px-5 py-2.5 text-xs font-medium text-muted md:grid">
             <span>№</span><span>Студент</span><span>Посещаемость</span><span>Оценка</span><span className="text-right">Семестр</span>
           </div>
           <ul className="divide-y divide-line">
@@ -207,7 +207,7 @@ export function Journal() {
                         onClick={() => (mode === "bulk" ? setDraftField(s.id, { grade: v.grade === g ? null : g }) : onGrade(s.id, v.grade === g ? null : g))}
                         className={cx(
                           "size-10 rounded-lg text-sm font-bold ring-1 transition-all duration-150 active:scale-95 md:size-9",
-                          v.grade === g ? "bg-brand-800 text-gold-400 ring-brand-800" : "bg-white text-brand-900 ring-line hover:ring-brand-700/40",
+                          v.grade === g ? "bg-brand-800 text-white ring-brand-800" : "bg-white text-brand-900 ring-line hover:ring-brand-700/40",
                           away && "opacity-30",
                         )}
                       >
@@ -226,7 +226,7 @@ export function Journal() {
             <div className="sticky bottom-[61px] flex flex-wrap items-center gap-3 rounded-b-[var(--radius-card)] border-t border-line bg-white/95 px-5 py-3 backdrop-blur lg:bottom-0">
               <span className="mr-auto text-sm text-muted">{changes.length ? <>Несохранённых изменений: <b className="text-brand-900">{changes.length}</b></> : "Изменений нет"}</span>
               <Button variant="outline" disabled={!changes.length} onClick={() => setDraft({})}>Сбросить</Button>
-              <Button variant="gold" disabled={!changes.length} onClick={saveBulk}>Сохранить</Button>
+              <Button variant="brand" disabled={!changes.length} onClick={saveBulk}>Сохранить</Button>
             </div>
           ) : (
             <div className="flex flex-wrap gap-x-5 gap-y-1 border-t border-line px-5 py-3 text-xs text-muted">

@@ -45,11 +45,11 @@ export function Toaster() {
           key={t.id}
           role="status"
           className={cx(
-            "pointer-events-auto relative left-1/2 flex animate-toast items-start gap-2.5 rounded-xl px-4 py-3 text-sm font-medium whitespace-pre-line shadow-[var(--shadow-pop)]",
-            t.tone === "ok" ? "bg-gradient-to-r from-brand-900 to-brand-700 text-white ring-1 ring-white/10" : "bg-gradient-to-r from-rose-600 to-danger text-white",
+            "pointer-events-auto relative left-1/2 flex animate-toast items-start gap-2.5 rounded-lg px-4 py-3 text-sm font-medium whitespace-pre-line text-white shadow-[var(--shadow-pop)]",
+            t.tone === "ok" ? "bg-slate-900" : "bg-rose-600",
           )}
         >
-          <Icon name={t.tone === "ok" ? "check" : "alert"} className="mt-px size-[18px] shrink-0 text-gold-400" />
+          <Icon name={t.tone === "ok" ? "check" : "alert"} className={cx("mt-px size-[18px] shrink-0", t.tone === "ok" ? "text-emerald-400" : "text-white")} />
           {t.msg}
         </div>
       ))}
@@ -76,7 +76,7 @@ export function Modal({ open, onClose, title, children, footer, wide }: { open: 
   }, [open, onClose]);
   if (!open || typeof document === "undefined") return null;
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex animate-fade items-end justify-center bg-brand-950/45 backdrop-blur-[2px] sm:items-center sm:p-6" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-[60] flex animate-fade items-end justify-center bg-slate-900/45 sm:items-center sm:p-6" onMouseDown={onClose}>
       <div
         ref={ref}
         role="dialog"
@@ -84,19 +84,18 @@ export function Modal({ open, onClose, title, children, footer, wide }: { open: 
         aria-label={title}
         onMouseDown={(e) => e.stopPropagation()}
         className={cx(
-          "safe-bottom flex max-h-[92dvh] w-full animate-sheet flex-col overflow-hidden rounded-t-3xl bg-white shadow-[var(--shadow-pop)] sm:animate-pop sm:rounded-3xl",
+          "safe-bottom flex max-h-[92dvh] w-full animate-sheet flex-col overflow-hidden rounded-t-2xl bg-white shadow-[var(--shadow-pop)] sm:animate-pop sm:rounded-xl",
           wide ? "sm:max-w-3xl" : "sm:max-w-lg",
         )}
       >
-        <div className="relative flex items-center justify-between gap-3 overflow-hidden bg-gradient-to-br from-brand-950 via-brand-900 to-brand-700 px-5 py-4 text-white">
-          <div className="pointer-events-none absolute -right-10 -top-14 size-36 rounded-full border-[16px] border-gold-500/20" />
-          <h2 className="relative text-base font-bold">{title}</h2>
-          <button onClick={onClose} aria-label="Закрыть" className="relative grid size-9 place-items-center rounded-xl bg-white/10 text-white transition hover:rotate-90 hover:bg-white/20">
+        <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3.5">
+          <h2 className="text-base font-semibold text-ink">{title}</h2>
+          <button onClick={onClose} aria-label="Закрыть" className="grid size-8 place-items-center rounded-md text-muted transition-colors hover:bg-subtle hover:text-ink">
             <Icon name="close" className="size-[18px]" />
           </button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
-        {footer && <div className="flex flex-wrap justify-end gap-2 border-t border-line bg-page/60 px-5 py-3">{footer}</div>}
+        {footer && <div className="flex flex-wrap justify-end gap-2 border-t border-line bg-subtle px-5 py-3">{footer}</div>}
       </div>
     </div>,
     document.body,
@@ -139,13 +138,13 @@ export function Skeleton({ className }: { className?: string }) {
 export function PageSkeleton() {
   return (
     <div className="space-y-6" aria-busy="true" aria-label="Загрузка">
-      <Skeleton className="h-9 w-64" />
+      <Skeleton className="h-10 w-64" />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
+        {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
       </div>
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <Skeleton className="h-72 rounded-2xl" />
-        <Skeleton className="h-72 rounded-2xl" />
+        <Skeleton className="h-72 rounded-xl" />
+        <Skeleton className="h-72 rounded-xl" />
       </div>
     </div>
   );

@@ -47,41 +47,37 @@ export function Profile() {
   }
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-3xl space-y-5">
       <PageHeader title="Профиль" />
-      <Card className="overflow-hidden">
-        <div className="relative h-24 overflow-hidden bg-gradient-to-r from-gold-400 via-gold-500 to-gold-600 sm:h-28">
-          <div className="dots-pattern absolute inset-0 opacity-60" />
-          <div className="absolute -right-10 -top-16 size-48 rounded-full border-[20px] border-white/25" />
-        </div>
-        <div className="-mt-12 flex flex-col items-center gap-3 px-5 pb-6 text-center sm:-mt-10 sm:flex-row sm:items-end sm:gap-5 sm:text-left">
-          <Avatar name={s.name} className="relative size-24 shrink-0 bg-gradient-to-br from-brand-700 to-brand-950 text-2xl text-gold-400 shadow-[0_12px_30px_-10px_rgb(10_33_72/0.6)] ring-4 ring-white sm:size-28" />
-          <div className="min-w-0 sm:pb-1">
-            <p className="text-xl font-extrabold tracking-tight text-brand-900 [overflow-wrap:anywhere] sm:text-2xl">{s.name}</p>
-            <span className="mt-1 inline-flex rounded-full bg-brand-50 px-3 py-0.5 text-xs font-semibold text-brand-700 ring-1 ring-brand-100">{ROLE_LABEL[s.role]}</span>
+      <Card>
+        <div className="flex items-center gap-4 border-b border-line p-4 sm:p-5">
+          <Avatar name={s.name} className="size-14 text-lg sm:size-16 sm:text-xl" />
+          <div className="min-w-0">
+            <p className="text-lg font-bold text-ink [overflow-wrap:anywhere] sm:text-xl">{s.name}</p>
+            <span className="mt-1 inline-flex rounded-md bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">{ROLE_LABEL[s.role]}</span>
           </div>
         </div>
-        <dl className="grid gap-2 border-t border-line/80 p-4 sm:grid-cols-2 sm:p-5">
+        <dl className="grid sm:grid-cols-2">
           {rows.filter(([, v]) => v).map(([k, v]) => (
-            <div key={k} className="lift min-w-0 rounded-xl border border-line/70 bg-page/50 px-4 py-3">
-              <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted">{k}</dt>
-              <dd className="mt-0.5 text-sm font-semibold text-ink [overflow-wrap:anywhere]">{v || "-"}</dd>
+            <div key={k} className="min-w-0 border-b border-line px-4 py-3 sm:px-5 sm:odd:border-r">
+              <dt className="text-xs text-muted">{k}</dt>
+              <dd className="mt-0.5 text-sm font-medium text-ink [overflow-wrap:anywhere]">{v}</dd>
             </div>
           ))}
         </dl>
       </Card>
-      <Card className="mt-6">
+      <Card>
         <CardHeader icon="key" title="Безопасность" />
         <div className="flex flex-wrap gap-3 p-5">
-          <Link href="/change-password/" className="inline-flex h-10 items-center gap-2 rounded-xl bg-gradient-to-b from-brand-700 to-brand-800 px-4 text-sm font-semibold text-white shadow-[0_6px_16px_-6px_rgb(18_48_106/0.6)] transition-all hover:-translate-y-px active:scale-[0.97]"><Icon name="key" className="size-4" />Сменить пароль</Link>
+          <Link href="/change-password/" className="inline-flex h-10 items-center gap-2 rounded-[var(--radius-control)] bg-brand-800 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700"><Icon name="key" className="size-4" />Сменить пароль</Link>
           <Button variant="outline" onClick={exit}><Icon name="logout" className="size-4" />Выйти</Button>
         </div>
       </Card>
       {isStaff && (
-        <Card className="mt-6">
+        <Card>
           <CardHeader icon="settings" title="Демо-режим" />
           <div className="p-5">
-            <Button variant="outline" className="text-rose-600" onClick={reset}>Сбросить демо-данные</Button>
+            <Button variant="outline" className="text-rose-600 hover:text-rose-700" onClick={reset}>Сбросить демо-данные</Button>
             <p className="mt-3 text-xs text-muted">Данные хранятся на сервере в базе SQLite. Сброс пересоздаёт базу с исходными демо-данными. В рабочей версии (DEMO_MODE=false) функция отключена.</p>
           </div>
         </Card>

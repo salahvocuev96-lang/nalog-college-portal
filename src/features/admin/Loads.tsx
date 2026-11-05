@@ -29,7 +29,7 @@ export function AdminLoads() {
   return (
     <div>
       <PageHeader title="Назначения преподавателей" subtitle="Преподаватель видит в журнале только назначенные ему группы и предметы. Сам себе назначения он выдать не может"
-        action={<Button variant="gold" onClick={() => setAdd(true)}><Icon name="plus" className="size-4" />Назначить</Button>} />
+        action={<Button variant="brand" onClick={() => setAdd(true)}><Icon name="plus" className="size-4" />Назначить</Button>} />
       <Card className="mb-4 grid gap-3 p-4 sm:grid-cols-2">
         <Select value={groupId} onChange={(e) => setGroupId(e.target.value)} aria-label="Группа"><option value="">Все группы</option>{db.groups.map((g) => <option key={g.id} value={g.id}>{g.code}</option>)}</Select>
         <Select value={teacherId} onChange={(e) => setTeacherId(e.target.value)} aria-label="Преподаватель"><option value="">Все преподаватели</option>{db.teachers.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</Select>
