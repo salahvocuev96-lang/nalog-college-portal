@@ -24,6 +24,20 @@ export function About() {
         <StatCard icon="layers" label="Специальностей" value={COLLEGE.specialties.length} />
       </div>
 
+      <Card>
+        <CardHeader icon="layers" title="Виртуальный тур по колледжу" subtitle="Осмотрите здание в интерактивном 3D-формате" />
+        <div className="overflow-hidden rounded-b-[var(--radius-card)]">
+          <iframe
+            src="https://ep.matterport.host/index/?m=Q7z9Lc2doGV"
+            className="w-full"
+            style={{ height: "520px", border: "none" }}
+            allow="xr-spatial-tracking; fullscreen"
+            allowFullScreen
+            title="Виртуальный тур по Налоговому колледжу"
+          />
+        </div>
+      </Card>
+
       <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
         <div className="min-w-0 space-y-5">
           <Card>
