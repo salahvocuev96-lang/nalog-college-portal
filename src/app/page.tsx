@@ -39,13 +39,14 @@ export default function LoginPage() {
         />
 
         {/* Логотип */}
-        <div className="relative flex items-center gap-3.5">
-          <span className="grid size-14 shrink-0 place-items-center rounded-2xl p-1.5 ring-1 ring-white/20" style={{ background: "rgba(255,255,255,0.08)" }}>
-            <Crest className="size-11" />
-          </span>
+        <div className="relative flex flex-col gap-3">
+          <div className="relative size-16">
+            <div className="pointer-events-none absolute inset-0 rounded-full bg-gold-400/15 blur-xl" />
+            <Crest className="relative size-16 drop-shadow-[0_0_12px_rgba(214,167,88,0.35)]" />
+          </div>
           <div>
-            <p className="text-[15px] font-bold leading-tight tracking-wide">Налоговый колледж</p>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-400">Education portal</p>
+            <p className="text-[17px] font-black leading-tight tracking-wide">Налоговый колледж</p>
+            <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-400">Education portal</p>
           </div>
         </div>
 

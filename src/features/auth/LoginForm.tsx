@@ -53,11 +53,14 @@ export function LoginForm({ demo }: { demo: boolean }) {
         <div className="pointer-events-none absolute -left-10 bottom-0 size-36 rounded-full border border-white/[0.05]" />
         <div className="pointer-events-none absolute right-4 top-4 size-28 rounded-full bg-gold-400/[0.06] blur-2xl" />
         <div className="relative flex flex-col items-center gap-3">
-          <span className="grid size-14 place-items-center rounded-2xl p-1.5 ring-1 ring-white/20" style={{ background: "rgba(255,255,255,0.1)" }}>
-            <Crest className="size-11" />
-          </span>
-          <p className="text-xl font-black tracking-tight">Налоговый колледж</p>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-400">Education portal</p>
+          <div className="relative size-14">
+            <div className="pointer-events-none absolute inset-0 rounded-full bg-gold-400/20 blur-lg" />
+            <Crest className="relative size-14 drop-shadow-[0_0_10px_rgba(214,167,88,0.4)]" />
+          </div>
+          <div className="flex flex-col items-center gap-0.5">
+            <p className="text-xl font-black tracking-tight">Налоговый колледж</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-400">Education portal</p>
+          </div>
         </div>
       </div>
 
