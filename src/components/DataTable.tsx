@@ -68,7 +68,9 @@ export function DataTable<T>({ rows, columns, rowKey, empty = "Ничего не
             <div className="text-sm font-semibold text-brand-900">{primary.render(r)}</div>
             <dl className="mt-2 grid border-t border-line/60 pt-2 grid-cols-2 gap-x-3 gap-y-1 text-xs">
               {columns.filter((c) => c !== primary).map((c) => (
-                <div key={c.key} className="min-w-0"><dt className="text-muted">{c.label}</dt><dd className="truncate text-ink">{c.render(r)}</dd></div>
+                c.label
+                  ? <div key={c.key} className="min-w-0"><dt className="text-muted">{c.label}</dt><dd className="truncate text-ink">{c.render(r)}</dd></div>
+                  : <div key={c.key} className="col-span-2 mt-1">{c.render(r)}</div>
               ))}
             </dl>
           </li>

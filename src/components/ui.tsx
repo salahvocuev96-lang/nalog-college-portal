@@ -191,7 +191,7 @@ export function StatCard({ label, value, hint, icon, tone = "brand", progress }:
     <Card hover className="relative overflow-hidden p-4 sm:p-5" style={{ boxShadow: "var(--shadow-stat)" }}>
       <div className={cx("pointer-events-none absolute -right-8 -top-8 size-28 rounded-full blur-2xl", t.glow)} />
       <div className="relative flex items-start justify-between gap-2">
-        <p className="min-w-0 text-[13px] font-semibold leading-tight text-muted">{label}</p>
+        <p className="min-w-0 hyphens-auto text-[12px] font-semibold leading-tight text-muted sm:text-[13px]">{label}</p>
         <span className={cx("grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br sm:size-11 sm:rounded-2xl", t.icon)}>
           <Icon name={icon} className="size-[18px] sm:size-5" />
         </span>

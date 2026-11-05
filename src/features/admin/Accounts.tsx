@@ -72,7 +72,7 @@ export function AdminAccounts() {
           { key: "role", label: "Роль", render: (a) => ROLE_LABEL[a.role], sort: (a) => a.role },
           { key: "state", label: "Состояние", render: (a) => !a.active ? <Badge tone="red">заблокирован</Badge> : a.mustChangePassword ? <Badge tone="gold">временный пароль</Badge> : <Badge tone="green">активен</Badge> },
           { key: "act", label: "", className: "text-right", render: (a) => a.role === "college_admin" || a.role === "tech_admin" ? <span className="text-xs text-muted">сотрудник</span> : (
-            <span className="inline-flex gap-1">
+            <span className="inline-flex flex-wrap gap-1">
               <button onClick={() => reset(a)} className="rounded-lg px-2 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-50">Сброс пароля</button>
               {a.id !== session?.id && <button onClick={() => run("account.setActive", { id: a.id, active: !a.active })} className="rounded-lg px-2 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50">{a.active ? "Заблокировать" : "Разблокировать"}</button>}
             </span>

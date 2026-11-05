@@ -30,7 +30,7 @@ export function systemHealth(c: Ctx) {
     node: process.version,
     uptimeSec: Math.round((Date.now() - startedAt) / 1000),
     memoryMb: Math.round(process.memoryUsage().rss / 1024 / 1024),
-    dbSizeKb: existsSync(file) ? Math.round(statSync(file).size / 1024) : 0,
+    dbSizeKb: Math.round([file, `${file}-wal`].reduce((sum, f) => sum + (existsSync(f) ? statSync(f).size : 0), 0) / 1024),
     migrations: (c.sql.prepare("SELECT version, applied_at FROM schema_migrations ORDER BY version").all() as { version: string; applied_at: number }[]).map((m) => ({ version: m.version, at: m.applied_at })),
     tables: { users: count("users"), sessions: count("sessions"), groups: count("groups"), students: count("students"), grades: count("grades"), audit_log: count("audit_log"), notifications: count("notifications") },
     backups: listBackups(),

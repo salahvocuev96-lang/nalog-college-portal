@@ -6,6 +6,9 @@ import { nameOf } from "@/lib/access";
 import { Badge, Card, Empty, PageHeader, SearchInput, Select, cx } from "@/components/ui";
 import { formatTime } from "@/lib/dates";
 import type { AuditEntry } from "@/lib/types";
+import { ATT_META } from "./attendance";
+
+const attLabel = (s: unknown) => (typeof s === "string" && s in ATT_META ? ATT_META[s as keyof typeof ATT_META].label.toLowerCase() : "—");
 
 export const ACTION_LABEL: Record<string, string> = {
   "grade.create": "Оценка выставлена",
@@ -99,7 +102,7 @@ function describe(db: ReturnType<typeof useStore>["db"], e: AuditEntry): string 
   if (e.entity === "grade" || e.entity === "attendance") {
     const [sid, subj, date] = e.entityId.split("|");
     const who = `${nameOf(db, sid)}, «${db.subjects.find((s) => s.id === subj)?.name ?? ""}», ${date?.split("-").reverse().join(".")}`;
-    const change = e.entity === "grade" ? `${b?.value ?? "—"} → ${a?.value ?? "—"}` : `${b?.status ?? "—"} → ${a?.status ?? "—"}`;
+    const change = e.entity === "grade" ? `${b?.value ?? "—"} → ${a?.value ?? "—"}` : `${attLabel(b?.status)} → ${attLabel(a?.status)}`;
     return `${who}: ${change}${e.reason ? `. Причина: ${e.reason}` : ""}`;
   }
   if (e.entity === "schedule") {
