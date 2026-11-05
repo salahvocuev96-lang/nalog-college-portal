@@ -7,5 +7,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next|crest.jpg|nk-logo.jpg|spec/|favicon.ico|$).+)"],
+  matcher: ["/((?!api|_next|crest.jpg|nk-logo.jpg|director.jpg|spec/|favicon.ico|$).+)"],
 };

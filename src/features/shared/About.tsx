@@ -1,6 +1,6 @@
 "use client";
 // Справочная страница о колледже. Сведения взяты с официального сайта налоговый-колледж.рф
-import { Avatar, Card, CardHeader, PageHeader, StatCard } from "@/components/ui";
+import { Card, CardHeader, PageHeader, StatCard } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { COLLEGE } from "@/lib/college";
 
@@ -42,7 +42,8 @@ export function About() {
                 {COLLEGE.director.speech.map((p) => <p key={p}>{p}</p>)}
               </div>
               <div className="mt-4 flex items-center gap-3">
-                <Avatar name={COLLEGE.director.name} />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/director.jpg" alt={COLLEGE.director.name} className="size-10 rounded-full object-cover" />
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-ink">{COLLEGE.director.name}</p>
                   <p className="text-xs text-muted">{COLLEGE.director.title}</p>
