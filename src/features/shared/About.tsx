@@ -58,7 +58,7 @@ export function About() {
               {COLLEGE.specialties.map((s) => (
                 <div key={s.code} className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-line">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={s.img} alt="" loading="lazy" className="aspect-[3/1] w-full object-cover" />
+                  <img src={s.img} alt="" loading="lazy" className="aspect-[16/9] w-full object-cover" />
                   <div className="flex-1 border-t-4 px-3 py-2.5" style={{ borderTopColor: s.color }}>
                     <p className="text-xs font-semibold tabular-nums text-muted">{s.code}</p>
                     <p className="text-sm font-medium text-ink">{s.name}</p>
