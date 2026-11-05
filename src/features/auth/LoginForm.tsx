@@ -44,15 +44,22 @@ export function LoginForm({ demo }: { demo: boolean }) {
 
   return (
     <div className="relative mx-auto w-full max-w-md animate-enter">
-      <div className="relative -mx-4 mb-8 flex flex-col items-center overflow-hidden rounded-b-[2rem] px-4 pb-8 pt-10 text-center text-white sm:-mx-10 lg:hidden">
+      {/* Мобильная шапка */}
+      <div className="relative -mx-5 mb-8 flex flex-col items-center overflow-hidden px-5 pb-8 pt-10 text-center text-white sm:-mx-10 lg:hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/nk-logo.jpg" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
-        <div className="pointer-events-none absolute inset-0 bg-brand-950/75" />
-        <p className="relative mt-4 text-xl font-extrabold">Налоговый колледж</p>
-        <p className="relative text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-400">Education portal</p>
+        <img src="/nk-logo.jpg" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-brand-950/40 to-brand-950/90" />
+        <div className="relative flex flex-col items-center gap-3">
+          <span className="grid size-14 place-items-center rounded-xl bg-white/10 p-1.5 ring-1 ring-white/20 backdrop-blur-sm">
+            <Crest className="size-11" />
+          </span>
+          <p className="text-xl font-black">Налоговый колледж</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-gold-400">Education portal</p>
+        </div>
       </div>
-      <h2 className="text-2xl font-extrabold tracking-tight text-brand-900 md:text-3xl">Вход в&nbsp;личный кабинет</h2>
-      <p className="mt-2 text-sm text-muted">Логин и&nbsp;временный пароль выдаёт учебная часть колледжа</p>
+
+      <h2 className="text-[26px] font-black tracking-tight text-brand-900">Вход в&nbsp;личный кабинет</h2>
+      <p className="mt-1.5 text-sm text-muted">Логин и&nbsp;временный пароль выдаёт учебная часть колледжа</p>
 
       <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
         <Field label="Логин">
