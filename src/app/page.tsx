@@ -1,5 +1,4 @@
 // Страница входа. Серверный компонент: цифры колледжа берутся из базы, форма работает на клиенте.
-import Image from "next/image";
 import { Crest } from "@/components/Crest";
 import { LoginForm } from "@/features/auth/LoginForm";
 import { getContext, isDemoMode } from "@/server/context";
@@ -29,7 +28,8 @@ export default function LoginPage() {
           </div>
         </div>
         <div className="relative flex justify-center">
-          <Image src="/nk-logo.jpg" alt="Налоговый колледж" width={220} height={220} className="rounded-3xl opacity-90 shadow-2xl" priority />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/nk-logo.jpg" alt="Налоговый колледж" width={200} height={200} className="rounded-3xl bg-white/90 p-4 shadow-2xl" />
         </div>
         <div className="relative max-w-xl stagger">
           <p className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-gold-400 ring-1 ring-white/15"><span className="pulse-dot size-1.5 rounded-full bg-gold-400" />Цифровой колледж</p>

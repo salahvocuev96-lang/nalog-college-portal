@@ -46,7 +46,8 @@ export function LoginForm({ demo }: { demo: boolean }) {
       <div className="relative -mx-4 mb-8 flex flex-col items-center overflow-hidden rounded-b-[2rem] bg-gradient-to-br from-brand-950 via-brand-900 to-brand-700 px-4 pb-8 pt-10 text-center text-white sm:-mx-10 lg:hidden">
         <div className="dots-pattern pointer-events-none absolute inset-0 opacity-50" />
         <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full border-[20px] border-gold-500/20" />
-        <span className="relative grid size-24 place-items-center rounded-3xl bg-white p-2 shadow-[0_12px_30px_-10px_rgb(229_169_26/0.7)] ring-4 ring-gold-500/30"><Crest className="size-20" /></span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/nk-logo.jpg" alt="Налоговый колледж" width={120} height={120} className="relative rounded-2xl bg-white/90 p-2 shadow-lg" />
         <p className="relative mt-4 text-xl font-extrabold">Налоговый колледж</p>
         <p className="relative text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-400">Education portal</p>
       </div>
