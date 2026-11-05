@@ -5,6 +5,7 @@ import { Icon, type IconName } from "@/components/icons";
 import { Button, Field, cx, inputCls } from "@/components/ui";
 import { Modal } from "@/components/feedback";
 import { demoLogin, login, requestPasswordReset } from "@/lib/store";
+import { COLLEGE } from "@/lib/college";
 
 const DEMO: { login: string; title: string; text: string; icon: IconName }[] = [
   { login: "student", title: "Студент", text: "Дневник, оценки, задания", icon: "book" },
@@ -79,6 +80,13 @@ export function LoginForm({ demo }: { demo: boolean }) {
           Забыли пароль?
         </button>
       </form>
+
+      <p className="mt-6 text-center text-xs text-muted">
+        Телефоны колледжа:{" "}
+        {COLLEGE.phones.map((p, i) => (
+          <span key={p}>{i > 0 && ", "}<a href={`tel:${p.replace(/[^\d+]/g, "")}`} className="whitespace-nowrap font-medium text-brand-700 hover:text-brand-900">{p}</a></span>
+        ))}
+      </p>
 
       {demo && (
         <div className="mt-8 rounded-xl border border-line bg-subtle p-4">

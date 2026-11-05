@@ -26,6 +26,7 @@ export const NAV: Record<Role, NavItem[]> = {
     I("/calendar/", "Календарь", "clock"),
     I("/messages/", "Сообщения", "chat", "Сообщения", S("Общение")),
     I("/notifications/", "Уведомления", "bell"),
+    I("/about/", "О колледже", "info", "Колледж", S("Колледж")),
     I("/profile/", "Профиль", "user", "Профиль", S("Аккаунт")),
   ],
   teacher: [
@@ -38,6 +39,7 @@ export const NAV: Record<Role, NavItem[]> = {
     I("/subjects/", "Мои предметы", "layers", "Предметы"),
     I("/messages/", "Сообщения", "chat", "Сообщения", S("Общение")),
     I("/notifications/", "Уведомления", "bell"),
+    I("/about/", "О колледже", "info", "Колледж", S("Колледж")),
     I("/profile/", "Профиль", "user", "Профиль", S("Аккаунт")),
   ],
   parent: [
@@ -49,6 +51,7 @@ export const NAV: Record<Role, NavItem[]> = {
     I("/attendance/", "Посещаемость", "check", "Пропуски"),
     I("/messages/", "Сообщения", "chat", "Сообщения", S("Общение")),
     I("/notifications/", "Уведомления", "bell"),
+    I("/about/", "О колледже", "info", "Колледж", S("Колледж")),
     I("/profile/", "Профиль", "user", "Профиль", S("Аккаунт")),
   ],
   college_admin: [
@@ -65,6 +68,7 @@ export const NAV: Record<Role, NavItem[]> = {
     I("/announcements/", "Объявления", "megaphone", "Объявления", S("Связь и контроль")),
     I("/messages/", "Сообщения", "chat"),
     I("/audit/", "Журнал аудита", "history", "Аудит"),
+    I("/about/", "О колледже", "info", "Колледж", S("Колледж")),
     I("/profile/", "Профиль", "user", "Профиль", S("Аккаунт")),
   ],
   tech_admin: [
@@ -72,6 +76,7 @@ export const NAV: Record<Role, NavItem[]> = {
     I("/audit/", "Журнал событий", "history", "События", P),
     I("/messages/", "Сообщения", "chat", "Сообщения", { ...S("Общение"), ...P }),
     I("/notifications/", "Уведомления", "bell", "Уведомления", P),
+    I("/about/", "О колледже", "info", "Колледж", S("Колледж")),
     I("/profile/", "Профиль", "user", "Профиль", S("Аккаунт")),
   ],
 };
