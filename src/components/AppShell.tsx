@@ -133,8 +133,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             {current && <><Icon name="chevronRight" className="size-3.5 text-slate-300" /><span className="truncate font-semibold text-ink">{current.label}</span></>}
           </nav>
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
-            <span className="hidden rounded-md bg-gold-50 px-2 py-1 text-xs font-semibold text-gold-700 sm:inline">Демо-версия</span>
-            <Bell />
+<Bell />
             <UserMenu name={session.name} role={ROLE_LABEL[session.role]} onLogout={onLogout} />
           </div>
         </div>
