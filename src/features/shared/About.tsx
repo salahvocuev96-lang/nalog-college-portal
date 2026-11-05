@@ -55,9 +55,16 @@ export function About() {
             <CardHeader icon="layers" title="Специальности" subtitle="Программы дополнены дисциплинами «Налоговая грамотность» и «Цифровая грамотность»" />
             <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
               {COLLEGE.specialties.map((s) => (
-                <div key={s.code} className="flex min-w-0 overflow-hidden rounded-lg border border-line">
-                  <span className="w-1.5 shrink-0" style={{ background: s.color }} />
-                  <div className="min-w-0 px-3 py-2.5">
+                <div key={s.code} className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-line">
+                  {"img" in s ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={s.img} alt="" loading="lazy" className="aspect-[3/1] w-full object-cover" />
+                  ) : (
+                    <div className="grid aspect-[3/1] w-full place-items-center" style={{ background: s.color }}>
+                      <span className="text-2xl font-bold tabular-nums text-white/90">{s.code}</span>
+                    </div>
+                  )}
+                  <div className="flex-1 border-t-4 px-3 py-2.5" style={{ borderTopColor: s.color }}>
                     <p className="text-xs font-semibold tabular-nums text-muted">{s.code}</p>
                     <p className="text-sm font-medium text-ink">{s.name}</p>
                   </div>
