@@ -45,16 +45,19 @@ export function LoginForm({ demo }: { demo: boolean }) {
   return (
     <div className="relative mx-auto w-full max-w-md animate-enter">
       {/* Мобильная шапка */}
-      <div className="relative -mx-5 mb-8 flex flex-col items-center overflow-hidden px-5 pb-8 pt-10 text-center text-white sm:-mx-10 lg:hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/nk-logo.jpg" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-brand-950/40 to-brand-950/90" />
+      <div
+        className="relative -mx-5 mb-8 flex flex-col items-center overflow-hidden px-5 pb-8 pt-10 text-center text-white sm:-mx-10 lg:hidden"
+        style={{ background: "linear-gradient(135deg, #0a1628 0%, #0f2044 50%, #152a58 100%)" }}
+      >
+        <div className="pointer-events-none absolute -right-10 -top-10 size-48 rounded-full border border-white/[0.07]" />
+        <div className="pointer-events-none absolute -left-10 bottom-0 size-36 rounded-full border border-white/[0.05]" />
+        <div className="pointer-events-none absolute right-4 top-4 size-28 rounded-full bg-gold-400/[0.06] blur-2xl" />
         <div className="relative flex flex-col items-center gap-3">
-          <span className="grid size-14 place-items-center rounded-xl bg-white/10 p-1.5 ring-1 ring-white/20 backdrop-blur-sm">
+          <span className="grid size-14 place-items-center rounded-2xl p-1.5 ring-1 ring-white/20" style={{ background: "rgba(255,255,255,0.1)" }}>
             <Crest className="size-11" />
           </span>
-          <p className="text-xl font-black">Налоговый колледж</p>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-gold-400">Education portal</p>
+          <p className="text-xl font-black tracking-tight">Налоговый колледж</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-400">Education portal</p>
         </div>
       </div>
 
