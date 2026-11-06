@@ -45,26 +45,17 @@ export function LoginForm({ demo }: { demo: boolean }) {
   return (
     <div className="relative mx-auto w-full max-w-md animate-enter">
       {/* Мобильная шапка */}
-      <div
-        className="relative -mx-5 mb-8 flex flex-col items-center overflow-hidden px-5 pb-8 pt-10 text-center text-white sm:-mx-10 lg:hidden"
-        style={{ background: "linear-gradient(135deg, #0a1628 0%, #0f2044 50%, #152a58 100%)" }}
-      >
-        <div className="pointer-events-none absolute -right-10 -top-10 size-48 rounded-full border border-white/[0.07]" />
-        <div className="pointer-events-none absolute -left-10 bottom-0 size-36 rounded-full border border-white/[0.05]" />
-        <div className="pointer-events-none absolute right-4 top-4 size-28 rounded-full bg-gold-400/[0.06] blur-2xl" />
-        <div className="relative flex flex-col items-center gap-3">
-          <div className="relative size-14">
-            <div className="pointer-events-none absolute inset-0 rounded-full bg-gold-400/20 blur-lg" />
-            <Crest className="relative size-14 drop-shadow-[0_0_10px_rgba(214,167,88,0.4)]" />
-          </div>
-          <div className="flex flex-col items-center gap-0.5">
-            <p className="text-xl font-black tracking-tight">Налоговый колледж</p>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-400">Education portal</p>
+      <div className="hero relative -mx-5 mb-7 overflow-hidden px-5 pb-7 pt-[max(2rem,env(safe-area-inset-top))] text-white sm:-mx-10 sm:px-10 lg:hidden">
+        <div className="hero-grid pointer-events-none absolute inset-0" />
+        <div className="relative flex items-center gap-3">
+          <span className="grid size-12 place-items-center rounded-xl bg-white p-1 shadow-lg"><Crest className="size-10" /></span>
+          <div>
+            <p className="text-[17px] font-semibold leading-tight">Налоговый колледж</p>
+            <p className="mt-0.5 text-[13px] text-gold-400">Электронный дневник и журнал</p>
           </div>
         </div>
       </div>
-
-      <h2 className="text-[26px] font-black tracking-tight text-brand-900">Вход в&nbsp;личный кабинет</h2>
+      <h2 className="text-[26px] font-semibold tracking-tight text-ink">Вход в&nbsp;личный кабинет</h2>
       <p className="mt-1.5 text-sm text-muted">Логин и&nbsp;временный пароль выдаёт учебная часть колледжа</p>
 
       <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
@@ -102,7 +93,7 @@ export function LoginForm({ demo }: { demo: boolean }) {
       </p>
 
       {demo && (
-        <div className="mt-8 rounded-xl border border-line bg-subtle p-4">
+        <div className="mt-8 rounded-xl border border-line bg-white p-4 lg:bg-subtle">
           <p className="text-sm font-semibold text-brand-900">Демонстрационный вход</p>
           <p className="mt-0.5 text-xs text-muted">Открыть кабинет без пароля. В рабочей версии этот блок отключается</p>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">

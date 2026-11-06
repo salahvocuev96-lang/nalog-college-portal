@@ -1,6 +1,6 @@
 "use client";
 // Справочная страница о колледже. Сведения взяты с официального сайта налоговый-колледж.рф
-import { Card, CardHeader, PageHeader, StatCard } from "@/components/ui";
+import { Card, CardHeader, PageHeader, StatCard, StatGrid } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { COLLEGE } from "@/lib/college";
 
@@ -17,12 +17,12 @@ export function About() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <StatGrid className="grid-cols-2 lg:grid-cols-4">
         <StatCard icon="calendar" label="Год основания" value={COLLEGE.founded} />
         <StatCard icon="users" label="Выпускников" value="3000+" tone="green" />
         <StatCard icon="star" label="Докторов и кандидатов наук" value="15+" tone="gold" />
         <StatCard icon="layers" label="Специальностей" value={COLLEGE.specialties.length} />
-      </div>
+      </StatGrid>
 
       <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
         <div className="min-w-0 space-y-5">

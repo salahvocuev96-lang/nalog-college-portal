@@ -107,7 +107,14 @@ export function Messages() {
 
         {/* Переписка */}
         <div className={cx("min-h-0 flex-col", active ? "flex" : "hidden md:flex")}>
-          {!active ? <div className="grid flex-1 place-items-center"><Empty icon="chat" title="Выберите диалог" /></div> : (
+          {!active ? (
+            <div className="grid flex-1 place-items-center bg-subtle/60">
+              <div className="flex flex-col items-center">
+                <Empty icon="chat" title="Выберите диалог" text="Откройте переписку слева или напишите преподавателю, куратору или в учебную часть" />
+                <Button variant="outline" className="-mt-3" onClick={() => setCompose(true)}><Icon name="plus" className="size-4" />Новое сообщение</Button>
+              </div>
+            </div>
+          ) : (
             <>
               <div className="flex items-center gap-3 border-b border-line px-4 py-3">
                 <button onClick={() => setActive(null)} className="rounded-lg p-1.5 text-brand-800 hover:bg-brand-50 md:hidden" aria-label="Назад"><Icon name="chevronLeft" /></button>
