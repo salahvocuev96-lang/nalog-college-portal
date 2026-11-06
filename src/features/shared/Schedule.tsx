@@ -122,7 +122,7 @@ export function Schedule() {
           <DayCard key={`${day}-${groupId}-${teacherId}-${mode}`} date={addDays(week, day - 1)} wd={day} lessons={lessonsOf(day)} teacherView={mode === "teacher"} isTeacher={isTeacher} now={now} editable={isAdmin && mode === "group"} onEdit={(slot) => setEdit({ weekday: day, slot })} />
         </>
       ) : (
-        <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {WEEKDAYS.map((_, i) => (
             <DayCard key={i} compact date={addDays(week, i)} wd={i + 1} lessons={lessonsOf(i + 1)} teacherView={mode === "teacher"} isTeacher={isTeacher} now={now} editable={isAdmin && mode === "group"} onEdit={(slot) => setEdit({ weekday: i + 1, slot })} />
           ))}
