@@ -46,7 +46,6 @@ export function LoginForm({ demo }: { demo: boolean }) {
     <div className="relative mx-auto w-full max-w-md animate-enter">
       {/* Мобильная шапка */}
       <div className="hero relative -mx-5 mb-7 overflow-hidden px-5 pb-7 pt-[max(2rem,env(safe-area-inset-top))] text-white sm:-mx-10 sm:px-10 lg:hidden">
-        <div className="hero-grid pointer-events-none absolute inset-0" />
         <div className="relative flex items-center gap-3">
           <Crest className="size-12" />
           <div>

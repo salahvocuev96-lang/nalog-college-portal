@@ -239,7 +239,6 @@ function LiveStatus({ lessons, teacherView }: { lessons: LessonView[]; teacherVi
   const progress = 1 - state.left / state.total;
   return (
     <div className="hero relative mb-5 overflow-hidden rounded-[var(--radius-card)] p-5 text-white shadow-card">
-      <div className="hero-grid pointer-events-none absolute inset-0" />
       <div className="relative flex flex-wrap items-center gap-x-6 gap-y-3">
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-2 text-xs font-semibold text-white/80">

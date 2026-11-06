@@ -16,7 +16,6 @@ export default function LoginPage() {
   return (
     <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1fr)_minmax(480px,44%)]">
       <section className="hero relative hidden overflow-hidden text-white lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-14">
-        <div className="hero-grid pointer-events-none absolute inset-0" />
         <div className="relative flex items-center gap-3.5">
           <Crest className="size-14" />
           <div>

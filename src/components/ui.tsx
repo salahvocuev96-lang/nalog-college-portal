@@ -202,7 +202,6 @@ export function Hero({ eyebrow, title, meta, actions, aside, metrics, metricCols
 }) {
   return (
     <section className="hero relative overflow-hidden rounded-[calc(var(--radius-card)+2px)] text-white shadow-[0_8px_24px_-12px_rgb(11_29_61/0.5)]">
-      <div className="hero-grid pointer-events-none absolute inset-0" />
       <div className="relative grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:items-center lg:gap-8">
         <div className="min-w-0">
           {eyebrow && <p className="text-[13px] text-white/60 first-letter:uppercase">{eyebrow}</p>}
