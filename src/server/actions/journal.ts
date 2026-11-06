@@ -92,6 +92,7 @@ const hwSchema = z.object({
   text: z.string().trim().max(2000),
   issued: isoDate.optional(),
   due: isoDate,
+  fileUrl: z.string().trim().url("Некорректная ссылка").max(2000).optional().or(z.literal("")),
 });
 const hwProgressSchema = z.object({ homeworkId: z.string(), status: z.enum(["new", "in_progress", "done"]) });
 
@@ -129,7 +130,7 @@ export const journalActions = {
     const issued = p.issued ?? today();
     if (p.due < issued) return fail("Срок сдачи раньше даты публикации");
     if (p.due > addDays(issued, 120)) return fail("Срок сдачи слишком далёкий");
-    const hw = { id: uid("hw"), groupId: p.groupId, subjectId: p.subjectId, teacherId: u.id, issued, due: p.due, title: p.title, text: p.text };
+    const hw = { id: uid("hw"), groupId: p.groupId, subjectId: p.subjectId, teacherId: u.id, issued, due: p.due, title: p.title, text: p.text, fileUrl: p.fileUrl ?? "" };
     repo.insertHomework(c, hw);
     for (const s of c.db.students.filter((x) => x.groupId === p.groupId)) {
       notify(c, s.id, "homework", "Новое домашнее задание", `«${subjName(c, p.subjectId)}»: ${hw.title}, срок ${fmtDate(hw.due)}`, "/homework/");

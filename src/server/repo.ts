@@ -50,7 +50,7 @@ export function loadDB(sql: DatabaseSync): DB {
     grades: {},
     attendance: {},
     homework: all(sql, "SELECT * FROM homework").map((r) => ({
-      id: S(r.id), groupId: S(r.group_id), subjectId: S(r.subject_id), teacherId: S(r.teacher_id), issued: S(r.issued), due: S(r.due), title: S(r.title), text: S(r.description),
+      id: S(r.id), groupId: S(r.group_id), subjectId: S(r.subject_id), teacherId: S(r.teacher_id), issued: S(r.issued), due: S(r.due), title: S(r.title), text: S(r.description), fileUrl: S(r.file_url ?? ""),
     })),
     homeworkProgress: {},
     messages: all(sql, "SELECT * FROM messages ORDER BY at").map((r) => ({ id: S(r.id), from: S(r.from_id), to: S(r.to_id), text: S(r.text), at: N(r.at), read: N(r.read) === 1 })),
@@ -141,7 +141,7 @@ function insertStudentRow(sql: DatabaseSync, s: Student) {
   sql.prepare("INSERT INTO students (id, name, group_id, email, phone) VALUES (?, ?, ?, ?, ?)").run(s.id, s.name, s.groupId, s.email, s.phone);
 }
 function insertHomeworkRow(sql: DatabaseSync, h: Homework) {
-  sql.prepare("INSERT INTO homework (id, group_id, subject_id, teacher_id, issued, due, title, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").run(h.id, h.groupId, h.subjectId, h.teacherId, h.issued, h.due, h.title, h.text);
+  sql.prepare("INSERT INTO homework (id, group_id, subject_id, teacher_id, issued, due, title, description, file_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)").run(h.id, h.groupId, h.subjectId, h.teacherId, h.issued, h.due, h.title, h.text, h.fileUrl ?? "");
 }
 function insertMessageRow(sql: DatabaseSync, m: Message) {
   sql.prepare("INSERT INTO messages (id, from_id, to_id, text, at, read) VALUES (?, ?, ?, ?, ?, ?)").run(m.id, m.from, m.to, m.text, m.at, m.read ? 1 : 0);

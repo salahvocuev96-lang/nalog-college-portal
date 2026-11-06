@@ -182,7 +182,7 @@ export function buildSeed(): DB {
     const issued = addDays(now, -Math.floor(r() * 10) - 1);
     const sport = /физ/i.test(subjById.get(l.subjectId)!.name);
     const [title, text] = sport ? ["Подготовка к нормативам", "Бег 100 м, подтягивания или пресс. Сдача на следующем занятии."] : pick(r, TASKS);
-    homework.push({ id: "hw_" + hash(l.groupId + l.subjectId).toString(36), ...l, issued, due: addDays(issued, 7), title, text });
+    homework.push({ id: "hw_" + hash(l.groupId + l.subjectId).toString(36), ...l, issued, due: addDays(issued, 7), title, text, fileUrl: "" });
   }
 
   const teachers = [...teachersByName.values()].sort((a, b) => a.name.localeCompare(b.name, "ru"));

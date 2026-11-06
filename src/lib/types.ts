@@ -98,6 +98,7 @@ export interface Homework {
   due: ISODate; // срок сдачи
   title: string;
   text: string; // описание
+  fileUrl: string; // ссылка на файл (Google Диск и т.п.)
 }
 
 /** Статус задания у конкретного студента. «Новое» = записи нет, «Просрочено» вычисляется по сроку */

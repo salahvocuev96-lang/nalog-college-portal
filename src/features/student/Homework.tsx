@@ -48,6 +48,12 @@ export function StudentHomework() {
                 </div>
                 <p className="mt-2 font-semibold leading-snug text-brand-900">{h.title}</p>
                 <p className="mt-1 flex-1 text-sm text-muted">{h.text}</p>
+                {h.fileUrl && (
+                  <a href={h.fileUrl} target="_blank" rel="noopener noreferrer" className="mt-3 flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm font-semibold text-brand-800 transition hover:bg-brand-100">
+                    <Icon name="link" className="size-4 shrink-0" />
+                    Открыть файл
+                  </a>
+                )}
                 <div className="mt-3 flex flex-wrap gap-x-3 text-xs text-muted">
                   <span>{db.teachers.find((t) => t.id === h.teacherId)?.name}</span>
                   <span>выдано {formatShort(h.issued)}</span>

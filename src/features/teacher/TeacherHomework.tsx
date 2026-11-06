@@ -16,6 +16,7 @@ export function TeacherHomework() {
   const sid = subs.some((s) => s.id === subjectId) ? subjectId : subs[0]?.id ?? "";
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
+  const [fileUrl, setFileUrl] = useState("");
   const [issued, setIssued] = useState(now);
   const [due, setDue] = useState(addDays(now, 7));
   const [busy, setBusy] = useState(false);
@@ -24,12 +25,13 @@ export function TeacherHomework() {
 
   const submit = async () => {
     setBusy(true);
-    const r = await act("homework.create", { groupId, subjectId: sid, title, text, issued, due });
+    const r = await act("homework.create", { groupId, subjectId: sid, title, text, issued, due, fileUrl: fileUrl.trim() || undefined });
     setBusy(false);
     toastResult(r);
     if (r.ok) {
       setTitle("");
       setText("");
+      setFileUrl("");
     }
   };
 
@@ -49,9 +51,12 @@ export function TeacherHomework() {
           <Field label="Дата публикации"><input type="date" value={issued} onChange={(e) => setIssued(e.target.value)} className={inputCls} /></Field>
           <Field label="Срок сдачи"><input type="date" value={due} min={issued} onChange={(e) => setDue(e.target.value)} className={inputCls} /></Field>
           <Field label="Описание" className="md:col-span-4"><textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} maxLength={2000} placeholder="Что нужно сделать и как сдать" className={`${inputCls} h-auto py-2`} /></Field>
+          <Field label="Ссылка на файл (необязательно)" className="md:col-span-4">
+            <input value={fileUrl} onChange={(e) => setFileUrl(e.target.value)} placeholder="https://drive.google.com/... или disk.yandex.ru/..." className={inputCls} type="url" />
+            <p className="mt-1 text-xs text-muted">Загрузите файл на Google Диск или Яндекс Диск, откройте доступ «по ссылке» и вставьте ссылку сюда</p>
+          </Field>
           <div className="flex flex-wrap items-center gap-3 md:col-span-4">
             <Button variant="brand" onClick={submit} disabled={!sid || title.trim().length < 3 || busy}>{busy ? "Публикуем…" : "Опубликовать задание"}</Button>
-            <span className="text-xs text-muted">Вложения файлов появятся в следующей версии</span>
           </div>
         </div>
       </Card>

@@ -1,0 +1,1 @@
+ALTER TABLE homework ADD COLUMN file_url TEXT NOT NULL DEFAULT '';
