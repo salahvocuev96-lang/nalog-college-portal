@@ -52,8 +52,8 @@ export function TeacherHomework() {
           <Field label="Срок сдачи"><input type="date" value={due} min={issued} onChange={(e) => setDue(e.target.value)} className={inputCls} /></Field>
           <Field label="Описание" className="md:col-span-4"><textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} maxLength={2000} placeholder="Что нужно сделать и как сдать" className={`${inputCls} h-auto py-2`} /></Field>
           <Field label="Ссылка на файл (необязательно)" className="md:col-span-4">
-            <input value={fileUrl} onChange={(e) => setFileUrl(e.target.value)} placeholder="https://drive.google.com/... или disk.yandex.ru/..." className={inputCls} type="url" />
-            <p className="mt-1 text-xs text-muted">Загрузите файл на Google Диск или Яндекс Диск, откройте доступ «по ссылке» и вставьте ссылку сюда</p>
+            <input value={fileUrl} onChange={(e) => setFileUrl(e.target.value)} placeholder="Вставьте ссылку на файл..." className={inputCls} type="text" />
+            <p className="mt-1 text-xs text-muted">Любая ссылка: Google Диск, Яндекс Диск, OneDrive и т.д. Студенты увидят кнопку «Открыть файл»</p>
           </Field>
           <div className="flex flex-wrap items-center gap-3 md:col-span-4">
             <Button variant="brand" onClick={submit} disabled={!sid || title.trim().length < 3 || busy}>{busy ? "Публикуем…" : "Опубликовать задание"}</Button>

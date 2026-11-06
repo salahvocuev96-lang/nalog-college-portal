@@ -92,7 +92,7 @@ const hwSchema = z.object({
   text: z.string().trim().max(2000),
   issued: isoDate.optional(),
   due: isoDate,
-  fileUrl: z.string().trim().url("Некорректная ссылка").max(2000).optional().or(z.literal("")),
+  fileUrl: z.string().trim().max(2000).optional(),
 });
 const hwProgressSchema = z.object({ homeworkId: z.string(), status: z.enum(["new", "in_progress", "done"]) });
 
