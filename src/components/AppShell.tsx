@@ -71,7 +71,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Боковое меню для компьютера */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[264px] flex-col bg-nav text-white lg:flex">
         <Link href="/home/" className="flex h-[68px] items-center gap-3 px-5">
-          <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-white p-1 shadow-sm"><Crest className="size-8" /></span>
+          <Crest className="size-10 shrink-0" />
           <div className="min-w-0 leading-tight">
             <p className="truncate text-[14px] font-semibold">Налоговый колледж</p>
             <p className="mt-0.5 text-[11px] font-medium text-gold-400">Электронный дневник</p>

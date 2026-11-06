@@ -18,7 +18,7 @@ export default function LoginPage() {
       <section className="hero relative hidden overflow-hidden text-white lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-14">
         <div className="hero-grid pointer-events-none absolute inset-0" />
         <div className="relative flex items-center gap-3.5">
-          <span className="grid size-14 place-items-center rounded-xl bg-white p-1.5 shadow-lg"><Crest className="size-11" /></span>
+          <Crest className="size-14" />
           <div>
             <p className="text-[17px] font-semibold leading-tight">Налоговый колледж</p>
             <p className="mt-0.5 text-[13px] text-gold-400">Электронный дневник и журнал</p>

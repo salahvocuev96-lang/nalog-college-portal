@@ -48,7 +48,7 @@ export function LoginForm({ demo }: { demo: boolean }) {
       <div className="hero relative -mx-5 mb-7 overflow-hidden px-5 pb-7 pt-[max(2rem,env(safe-area-inset-top))] text-white sm:-mx-10 sm:px-10 lg:hidden">
         <div className="hero-grid pointer-events-none absolute inset-0" />
         <div className="relative flex items-center gap-3">
-          <span className="grid size-12 place-items-center rounded-xl bg-white p-1 shadow-lg"><Crest className="size-10" /></span>
+          <Crest className="size-12" />
           <div>
             <p className="text-[17px] font-semibold leading-tight">Налоговый колледж</p>
             <p className="mt-0.5 text-[13px] text-gold-400">Электронный дневник и журнал</p>
