@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { act, useStore } from "@/lib/store";
-import { AvgBadge, Badge, Button, Card, CardHeader, Empty, Field, PageHeader, SearchInput, Select, StatCard, cx, inputCls } from "@/components/ui";
+import { AvgBadge, Badge, Button, Card, CardHeader, Empty, Field, Hero, MoreLink, PageHeader, SearchInput, Select, cx, heroBtn, inputCls } from "@/components/ui";
 import { DataTable } from "@/components/DataTable";
 import { Modal, toastResult } from "@/components/feedback";
 import { Icon } from "@/components/icons";
@@ -48,66 +48,123 @@ export function AdminHome() {
     return { c, groups: gs.length, students, avg: avgs.length ? avgs.reduce((a, s) => a + s!.avg! * s!.students, 0) / avgs.reduce((a, s) => a + s!.students, 0) : null };
   });
   const top = db.groups.map((g) => ({ g, avg: stat.get(g.id)?.avg ?? null, att: stat.get(g.id)?.attendanceRate ?? null })).sort((a, b) => (b.avg ?? 0) - (a.avg ?? 0));
-  const recent = db.audit.filter((e) => e.action !== "auth.login" && e.action !== "grade.create").slice(0, 7);
+  const recent = db.audit.filter((e) => e.action !== "auth.login" && e.action !== "grade.create").slice(0, 8);
   const maxStudents = Math.max(...byCourse.map((c) => c.students), 1);
 
+  const weak = db.groups
+    .map((g) => ({ g, avg: stat.get(g.id)?.avg ?? null, att: stat.get(g.id)?.attendanceRate ?? null }))
+    .filter((x) => (x.avg !== null && x.avg < 3.8) || (x.att !== null && x.att < 90))
+    .sort((a, b) => (a.avg ?? 5) - (b.avg ?? 5))
+    .slice(0, 4);
+  const todayChanges = (db.scheduleChanges ?? []).filter((c) => c.date >= db.serverToday).length;
+
   return (
-    <div className="space-y-6">
-      <PageHeader title="Обзор колледжа" subtitle={`${sem.label}, данные на ${db.serverToday.split("-").reverse().join(".")}`} action={<Link href="/announcements/" className="inline-flex h-10 items-center gap-2 rounded-xl bg-brand-800 px-4 text-sm font-semibold text-white hover:bg-brand-700"><Icon name="megaphone" className="size-4" />Объявление</Link>} />
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 2xl:grid-cols-6">
-        <StatCard label="Студентов" value={db.students.length} icon="users" />
-        <StatCard label="Преподавателей" value={db.teachers.length} icon="user" />
-        <StatCard label="Групп" value={db.groups.length} hint="1-4 курс" icon="layers" tone="gold" />
-        <StatCard label="Предметов" value={db.subjects.length} icon="book" />
-        <StatCard label="Средний балл" value={avg === null ? "—" : avg.toFixed(2).replace(".", ",")} hint={sem.label} icon="star" tone="gold" />
-        <StatCard label="Посещаемость" value={att === null ? "—" : `${Math.round(att)}%`} hint="присутствие на парах" icon="check" tone={att !== null && att >= 90 ? "green" : "red"} />
-      </div>
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader icon="chart" title="Курсы: студенты и средний балл" />
-          <div className="space-y-4 p-5">
-            {byCourse.map((c) => (
-              <div key={c.c}>
-                <div className="mb-1.5 flex items-center justify-between text-sm">
-                  <span className="font-semibold text-brand-900">{c.c} курс <span className="font-normal text-muted">· {c.groups} групп</span></span>
-                  <span className="flex items-center gap-2"><span className="tabular-nums text-muted">{c.students} чел.</span><AvgBadge value={c.avg} /></span>
-                </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-brand-50">
-                  <div className="h-full origin-left animate-[enter_600ms_var(--ease-out)_both] rounded-full bg-brand-700 transition-[width] duration-700" style={{ width: `${(c.students / maxStudents) * 100}%` }} />
-                </div>
+    <div className="stagger space-y-4 sm:space-y-5">
+      <Hero
+        eyebrow="Учебная часть"
+        title="Обзор колледжа"
+        meta={<span>{sem.label} · данные на {db.serverToday.split("-").reverse().join(".")}</span>}
+        actions={<>
+          <Link href="/announcements/" className={heroBtn(true)}><Icon name="megaphone" className="size-4" />Объявление</Link>
+          <Link href="/changes/" className={heroBtn()}><Icon name="calendar" className="size-4" />Замены{todayChanges > 0 && <span className="rounded bg-white/15 px-1.5 text-[11px]">{todayChanges}</span>}</Link>
+          <Link href="/accounts/" className={cx(heroBtn(), "max-sm:hidden")}><Icon name="key" className="size-4" />Аккаунты</Link>
+        </>}
+        aside={
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { label: "Средний балл", value: avg === null ? "—" : avg.toFixed(2).replace(".", ","), hint: sem.label, pct: avg === null ? 0 : (avg / 5) * 100, cls: "bg-gold-400" },
+              { label: "Посещаемость", value: att === null ? "—" : `${Math.round(att)}%`, hint: "присутствие на парах", pct: att ?? 0, cls: att !== null && att >= 90 ? "bg-emerald-400" : "bg-rose-400" },
+            ].map((m) => (
+              <div key={m.label} className="rounded-xl bg-white/[0.07] p-3.5 ring-1 ring-inset ring-white/10">
+                <p className="text-xs text-white/60">{m.label}</p>
+                <p className="mt-1 text-[26px] font-semibold leading-none tabular-nums">{m.value}</p>
+                <div className="mt-2.5 h-1 overflow-hidden rounded-full bg-white/10"><div className={cx("bar-x h-full rounded-full", m.cls)} style={{ width: `${m.pct}%` }} /></div>
+                <p className="mt-1.5 truncate text-[11px] text-white/45">{m.hint}</p>
               </div>
             ))}
           </div>
-        </Card>
+        }
+        metrics={[
+          { label: "Студентов", value: db.students.length, hint: `${db.parents.length} родителей` },
+          { label: "Преподавателей", value: db.teachers.length },
+          { label: "Групп", value: db.groups.length, hint: "1–4 курс" },
+          { label: "Предметов", value: db.subjects.length },
+        ]}
+      />
+
+      <div className="grid gap-4 sm:gap-5 lg:grid-cols-2 xl:grid-cols-3">
+        <div className="min-w-0 space-y-4 sm:space-y-5">
+          <Card>
+            <CardHeader icon="chart" title="Курсы" subtitle="Студенты и средний балл" />
+            <div className="space-y-4 p-4 sm:p-5">
+              {byCourse.map((c) => (
+                <div key={c.c}>
+                  <div className="mb-1.5 flex items-center justify-between gap-2 text-sm">
+                    <span className="font-semibold text-ink">{c.c} курс <span className="font-normal text-muted">· {c.groups} групп · {c.students} чел.</span></span>
+                    <AvgBadge value={c.avg} />
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div className="bar-x h-full rounded-full bg-brand-600" style={{ width: `${(c.students / maxStudents) * 100}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+          <Card>
+            <CardHeader icon="alert" tone="red" title="Требуют внимания" subtitle="Балл ниже 3,8 или посещаемость ниже 90%" />
+            {weak.length === 0 ? <Empty icon="check" title="Всё в порядке" text="Отстающих групп нет" /> : (
+              <ul className="divide-y divide-line">
+                {weak.map(({ g, avg: a, att: r }) => (
+                  <li key={g.id}>
+                    <Link href="/groups/" className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-subtle sm:px-5">
+                      <span className="w-12 text-sm font-semibold text-ink">{g.code}</span>
+                      <span className="min-w-0 flex-1 truncate text-xs text-muted">{SPECIALTIES[g.specialty]}</span>
+                      <span className={cx("text-xs tabular-nums", r !== null && r < 90 ? "font-semibold text-rose-600" : "text-muted")}>{r ?? "—"}%</span>
+                      <AvgBadge value={a} />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+        </div>
         <Card>
-          <CardHeader icon="star" title="Группы по среднему баллу" action={<Link href="/groups/" className="text-[13px] font-semibold text-gold-600">Все группы</Link>} />
+          <CardHeader icon="star" tone="gold" title="Рейтинг групп" subtitle="По среднему баллу" action={<Link href="/groups/"><MoreLink>Все группы</MoreLink></Link>} />
           <ul className="divide-y divide-line">
-            {top.slice(0, 6).map(({ g, avg: a, att: r }, i) => (
-              <li key={g.id} className="flex items-center gap-3 px-5 py-2.5">
-                <span className={cx("grid size-7 place-items-center rounded-lg text-xs font-bold", i < 3 ? "bg-gold-500 text-brand-950" : "bg-brand-50 text-brand-700")}>{i + 1}</span>
-                <span className="min-w-0 flex-1 truncate text-sm font-semibold">{g.code} <span className="font-normal text-muted">{SPECIALTIES[g.specialty]}</span></span>
+            {top.slice(0, 8).map(({ g, avg: a, att: r }, i) => (
+              <li key={g.id} className="flex items-center gap-3 px-4 py-2.5 sm:px-5">
+                <span className={cx("grid size-6 shrink-0 place-items-center rounded-md text-[11px] font-bold tabular-nums", i < 3 ? "bg-gold-100 text-gold-700" : "bg-slate-100 text-slate-500")}>{i + 1}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold text-ink">{g.code}</span>
+                  <span className="block truncate text-xs text-muted">{SPECIALTIES[g.specialty]}</span>
+                </span>
                 <span className="text-xs tabular-nums text-muted">{r ?? "—"}%</span>
                 <AvgBadge value={a} />
               </li>
             ))}
           </ul>
         </Card>
+        <Card className="lg:col-span-2 xl:col-span-1">
+          <CardHeader icon="history" title="Последние изменения" action={<Link href="/audit/"><MoreLink>Журнал</MoreLink></Link>} />
+          {recent.length === 0 ? <Empty icon="history" title="Изменений пока не было" text="Здесь появятся изменения оценок, расписания и аккаунтов" /> : (
+            <ol className="px-4 py-2 sm:px-5">
+              {recent.map((e, i) => (
+                <li key={e.id} className="relative flex gap-3 py-2">
+                  <span className="relative flex w-2.5 shrink-0 justify-center">
+                    <span className={cx("absolute w-px bg-line", i === 0 ? "top-2.5" : "-top-2", i === recent.length - 1 ? "h-3" : "-bottom-2")} />
+                    <span className="relative mt-1.5 size-2 rounded-full bg-brand-500 ring-[3px] ring-white" />
+                  </span>
+                  <span className="min-w-0 flex-1 text-[13px]">
+                    <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5"><span className="font-medium text-ink">{nameOf(db, e.actorId)}</span><span className="text-muted">{ACTION_LABEL[e.action] ?? e.action}</span></span>
+                    {e.reason && <span className="block truncate text-xs italic text-muted">«{e.reason}»</span>}
+                    <span className="text-[11px] tabular-nums text-muted/80">{formatTime(e.at)}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </Card>
       </div>
-      <Card>
-        <CardHeader icon="history" title="Последние изменения" action={<Link href="/audit/" className="text-[13px] font-semibold text-gold-600">Журнал аудита</Link>} />
-        {recent.length === 0 ? <Empty icon="history" title="Изменений пока не было" text="Здесь появятся изменения оценок, расписания и аккаунтов" /> : (
-          <ul className="divide-y divide-line">
-            {recent.map((e) => (
-              <li key={e.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-5 py-3 text-sm">
-                <span className="w-24 text-xs tabular-nums text-muted">{formatTime(e.at)}</span>
-                <span className="font-medium text-brand-900">{nameOf(db, e.actorId)}</span>
-                <Badge tone="gold">{ACTION_LABEL[e.action] ?? e.action}</Badge>
-                {e.reason && <span className="text-muted">«{e.reason}»</span>}
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
     </div>
   );
 }
@@ -133,7 +190,7 @@ export function AdminGroups() {
         </Select>
         <Button variant="brand" onClick={async () => toastResult(await act("group.create", { course, specialty: spec }))}><Icon name="plus" className="size-4" />Добавить группу</Button>
       </Card>
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid items-start gap-4 sm:gap-5 xl:grid-cols-2">
         {COURSES.map((c) => {
           const gs = db.groups.filter((g) => g.course === c);
           return (

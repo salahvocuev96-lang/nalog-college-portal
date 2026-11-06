@@ -147,6 +147,39 @@ export const adminActions = {
     notify(c, before.teacherId, "schedule", "Изменение расписания", text, "/schedule/");
     return ok("Занятие удалено из расписания");
   }),
+  "schedule.addChange": admin((c, u, raw) => {
+    const p = z.object({
+      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      groupId: id,
+      slot: z.number().int().min(1).max(8),
+      kind: z.enum(["cancel", "substitute"]),
+      newTeacherId: z.string().optional(),
+      newRoom: z.string().max(80).optional(),
+      note: z.string().max(200).optional(),
+    }).parse(raw);
+    if (!c.db.groups.some((g) => g.id === p.groupId)) return fail("Группа не найдена");
+    if (p.newTeacherId && !c.db.teachers.some((t) => t.id === p.newTeacherId)) return fail("Преподаватель не найден");
+    c.sql.prepare(
+      "INSERT INTO schedule_changes (date, group_id, slot, kind, new_teacher_id, new_room, note, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(date, group_id, slot) DO UPDATE SET kind=excluded.kind, new_teacher_id=excluded.new_teacher_id, new_room=excluded.new_room, note=excluded.note, created_at=excluded.created_at"
+    ).run(p.date, p.groupId, p.slot, p.kind, p.newTeacherId ?? null, p.newRoom ?? null, p.note ?? null, Date.now());
+    const g = c.db.groups.find((x) => x.id === p.groupId)!;
+    const slot = c.db.schedule.find((s) => s.groupId === p.groupId && s.slot === p.slot);
+    const subj = slot ? (c.db.subjects.find((s) => s.id === slot.subjectId)?.name ?? "") : `${p.slot} пара`;
+    const dateStr = p.date.split("-").reverse().join(".");
+    const text = p.kind === "cancel" ? `${g.code}, ${dateStr}: ${subj} отменена` : `${g.code}, ${dateStr}: замена — ${subj}`;
+    c.db.students.filter((s) => s.groupId === g.id).forEach((s) => notify(c, s.id, "schedule", "Изменение расписания", text, "/schedule/"));
+    if (slot) notify(c, slot.teacherId, "schedule", "Изменение расписания", text, "/schedule/");
+    if (p.newTeacherId && p.newTeacherId !== slot?.teacherId) notify(c, p.newTeacherId, "schedule", "Вы назначены на замену", text, "/schedule/");
+    c.db.scheduleChanges = c.db.scheduleChanges.filter((x) => !(x.date === p.date && x.groupId === p.groupId && x.slot === p.slot));
+    c.db.scheduleChanges.push({ id: 0, date: p.date, groupId: p.groupId, slot: p.slot, kind: p.kind, newTeacherId: p.newTeacherId, newRoom: p.newRoom, note: p.note, createdAt: Date.now() });
+    return ok(p.kind === "cancel" ? "Пара отменена, студенты уведомлены" : "Замена добавлена, студенты уведомлены");
+  }),
+  "schedule.removeChange": admin((c, u, raw) => {
+    const p = z.object({ date: z.string(), groupId: id, slot: z.number().int().min(1).max(8) }).parse(raw);
+    c.sql.prepare("DELETE FROM schedule_changes WHERE date = ? AND group_id = ? AND slot = ?").run(p.date, p.groupId, p.slot);
+    c.db.scheduleChanges = c.db.scheduleChanges.filter((x) => !(x.date === p.date && x.groupId === p.groupId && x.slot === p.slot));
+    return ok("Замена удалена, расписание восстановлено");
+  }),
   "settings.update": admin((c, u, raw) => {
     const md = z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, "Формат ММ-ДД");
     const p = z.object({ semester1: z.object({ from: md, to: md }), semester2: z.object({ from: md, to: md }), finalGradeRule: z.enum(["mean_round", "mean_floor"]) }).parse(raw);

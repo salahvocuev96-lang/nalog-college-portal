@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useStore, act } from "@/lib/store";
 import { viewedStudentId } from "@/lib/access";
-import { Badge, Button, Card, Empty, Field, PageHeader, Segmented, Select, cx, inputCls } from "@/components/ui";
+import { Badge, Button, Card, Field, PageHeader, Segmented, Select, cx, inputCls } from "@/components/ui";
 import { Modal, toastResult, useConfirm } from "@/components/feedback";
 import { Icon } from "@/components/icons";
 import { TIME_SLOTS, WEEKDAYS, addDays, formatLong, formatShort, startOfWeek, toMinutes, weekday } from "@/lib/dates";
@@ -37,6 +37,10 @@ export function Schedule() {
   const [groupId, setGroupId] = useState(db.students.find((s) => s.id === sid)?.groupId ?? db.groups[0]?.id ?? "");
   const [teacherId, setTeacherId] = useState(isTeacher ? session!.id : db.teachers[0]?.id ?? "");
   const [layout, setLayout] = useState<"day" | "week">("day");
+  // На широком экране неделя помещается целиком: показываем её сразу
+  useEffect(() => {
+    if (window.matchMedia("(min-width: 1024px)").matches) setLayout("week");
+  }, []);
   const [weekOffset, setWeekOffset] = useState(0);
   const now = db.serverToday;
   const todayWd = weekday(now);
@@ -45,11 +49,22 @@ export function Schedule() {
   const [edit, setEdit] = useState<{ weekday: number; slot: number } | null>(null);
 
   const week = addDays(startOfWeek(now), weekOffset * 7);
-  const lessonsOf = (wd: number) =>
-    db.schedule
+  const lessonsOf = (wd: number): LessonView[] => {
+    const date = addDays(week, wd - 1);
+    const base = db.schedule
       .filter((s) => s.weekday === wd && (mode === "teacher" ? s.teacherId === teacherId : s.groupId === groupId))
       .sort((a, b) => a.slot - b.slot)
       .map((s) => view(db, s));
+    const changes = (db.scheduleChanges ?? []).filter((c) => c.date === date);
+    if (!changes.length) return base;
+    return base.map((l) => {
+      const ch = changes.find((c) => c.groupId === l.groupId && c.slot === l.slot);
+      if (!ch) return l;
+      if (ch.kind === "cancel") return { ...l, changeKind: "cancel" as const, changeNote: ch.note };
+      const newTeacher = ch.newTeacherId ? (db.teachers.find((t) => t.id === ch.newTeacherId)?.name ?? l.teacher) : l.teacher;
+      return { ...l, teacher: newTeacher, room: ch.newRoom ?? l.room, changeKind: "substitute" as const, changeNote: ch.note };
+    });
+  };
 
   const group = db.groups.find((g) => g.id === groupId);
   const groupOptions = db.groups.filter((g) => g.code.toLowerCase().includes(q.trim().toLowerCase()));
@@ -107,7 +122,7 @@ export function Schedule() {
           <DayCard key={`${day}-${groupId}-${teacherId}-${mode}`} date={addDays(week, day - 1)} wd={day} lessons={lessonsOf(day)} teacherView={mode === "teacher"} isTeacher={isTeacher} now={now} editable={isAdmin && mode === "group"} onEdit={(slot) => setEdit({ weekday: day, slot })} />
         </>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
           {WEEKDAYS.map((_, i) => (
             <DayCard key={i} compact date={addDays(week, i)} wd={i + 1} lessons={lessonsOf(i + 1)} teacherView={mode === "teacher"} isTeacher={isTeacher} now={now} editable={isAdmin && mode === "group"} onEdit={(slot) => setEdit({ weekday: i + 1, slot })} />
           ))}
@@ -129,17 +144,17 @@ function DayCard({ date, wd, lessons, teacherView, isTeacher, now, compact, edit
   date: string; wd: number; lessons: LessonView[]; teacherView: boolean; isTeacher: boolean; now: string; compact?: boolean; editable: boolean; onEdit: (slot: number) => void;
 }) {
   const isToday = date === now;
-  const slots = editable ? TIME_SLOTS.map((_, i) => i + 1) : lessons.map((l) => l.slot);
+  // В одно время у преподавателя может быть несколько групп: строки берём из самих занятий
+  const rows: { n: number; l?: LessonView }[] = editable ? TIME_SLOTS.map((_, i) => ({ n: i + 1, l: lessons.find((x) => x.slot === i + 1) })) : lessons.map((l) => ({ n: l.slot, l }));
   return (
     <Card className={cx("overflow-hidden", !compact && "animate-enter", isToday && "border-brand-600 ring-1 ring-brand-600")}>
       <div className={cx("flex items-center justify-between border-b px-5 py-3", isToday ? "border-brand-100 bg-brand-50" : "border-line")}>
         <p className="font-semibold text-ink">{WEEKDAYS[wd - 1]}<span className="ml-2 text-xs font-normal text-muted">{formatLong(date)}</span></p>
-        {isToday ? <span className="rounded bg-brand-700 px-1.5 py-0.5 text-[11px] font-semibold text-white">Сегодня</span> : <p className="text-xs text-muted">{lessons.length ? `${lessons.length} пар` : ""}</p>}
+        {isToday ? <span className="rounded bg-brand-700 px-1.5 py-0.5 text-[11px] font-semibold text-white">Сегодня</span> : <p className="text-xs tabular-nums text-muted">{lessons.length ? `${lessons.length} ${lessons.length === 1 ? "пара" : lessons.length < 5 ? "пары" : "пар"}` : ""}</p>}
       </div>
-      {slots.length === 0 ? <Empty icon="calendar" title="Пар нет" /> : (
+      {rows.length === 0 ? <p className="px-5 py-6 text-center text-sm text-muted">Пар нет</p> : (
         <ul className="divide-y divide-line">
-          {slots.map((n) => {
-            const l = lessons.find((x) => x.slot === n);
+          {rows.map(({ n, l }, idx) => {
             const t = TIME_SLOTS[n - 1];
             const journalHref = l && isTeacher && date <= now ? `/journal/?group=${l.groupId}&subject=${l.subjectId}&date=${date}` : null;
             const body = (
@@ -150,11 +165,16 @@ function DayCard({ date, wd, lessons, teacherView, isTeacher, now, compact, edit
                 </div>
                 {l ? (
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium leading-snug">{l.subject}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className={cx("text-sm font-medium leading-snug", l.changeKind === "cancel" && "text-muted line-through")}>{l.subject}</p>
+                      {l.changeKind === "cancel" && <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-700">Отменено</span>}
+                      {l.changeKind === "substitute" && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">Замена</span>}
+                    </div>
                     <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted">
                       <span>{teacherView ? `Группа ${l.group}` : l.teacher}</span>
                       {l.room && <span className="inline-flex items-center gap-1"><Icon name="home" className="size-3" />{/^\d/.test(l.room) ? `ауд. ${l.room}` : l.room}</span>}
                     </p>
+                    {l.changeNote && <p className="mt-0.5 text-xs italic text-muted">{l.changeNote}</p>}
                   </div>
                 ) : <p className="self-center text-sm text-muted/70">{editable ? "Свободно · добавить" : "—"}</p>}
                 {journalHref && <span className="self-center text-xs font-semibold text-brand-700"><Icon name="journal" className="size-[18px]" /></span>}
@@ -162,7 +182,7 @@ function DayCard({ date, wd, lessons, teacherView, isTeacher, now, compact, edit
               </div>
             );
             return (
-              <li key={n}>
+              <li key={`${n}-${l?.groupId ?? ""}-${l?.subjectId ?? ""}-${idx}`}>
                 {journalHref ? <Link href={journalHref} className="block transition hover:bg-brand-50/60" title="Открыть журнал этого занятия">{body}</Link>
                   : editable ? <button onClick={() => onEdit(n)} className="block w-full text-left transition hover:bg-brand-50/60">{body}</button>
                   : body}
@@ -218,22 +238,23 @@ function LiveStatus({ lessons, teacherView }: { lessons: LessonView[]; teacherVi
   const label = state.kind === "lesson" ? "Идёт пара" : state.kind === "break" ? "Перемена" : "До начала занятий";
   const progress = 1 - state.left / state.total;
   return (
-    <div className="relative mb-5 overflow-hidden rounded-[var(--radius-card)] bg-brand-900 p-5 text-white shadow-card">
+    <div className="hero relative mb-5 overflow-hidden rounded-[var(--radius-card)] p-5 text-white shadow-card">
+      <div className="hero-grid pointer-events-none absolute inset-0" />
       <div className="relative flex flex-wrap items-center gap-x-6 gap-y-3">
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-2 text-xs font-semibold text-white/80">
-            <span className={cx("size-2 rounded-full", state.kind === "lesson" ? "animate-pulse bg-emerald-400" : "bg-gold-400")} />{label}
+            <span className={cx("size-2 rounded-full", state.kind === "lesson" ? "pulse-dot bg-gold-400" : "bg-white/40")} /><span className="uppercase tracking-[0.12em] text-gold-400">{label}</span>
           </p>
           <p className="mt-1 truncate text-lg font-semibold">{state.kind === "lesson" ? state.l.subject : `Далее: ${state.l.subject}`}</p>
           <p className="text-sm text-white/60">{state.l.slot} пара · {state.l.time.replace("-", "–")}{state.l.room ? ` · ${state.l.room}` : ""}{teacherView ? ` · ${state.l.group}` : ""}</p>
         </div>
         <div className="text-right">
           <p className="text-xs text-white/60">{state.kind === "lesson" ? "до конца" : "до начала"}</p>
-          <p className="font-mono text-3xl font-bold tabular-nums text-white">{fmt(state.left)}</p>
+          <p className="text-[32px] font-semibold leading-none tracking-tight tabular-nums text-white">{fmt(state.left)}</p>
         </div>
       </div>
       <div className="relative mt-4 h-1.5 overflow-hidden rounded-full bg-white/10">
-        <div className="h-full rounded-full bg-white transition-[width] duration-1000 ease-linear" style={{ width: `${Math.min(100, Math.max(0, progress * 100))}%` }} />
+        <div className="h-full rounded-full bg-gold-400 transition-[width] duration-1000 ease-linear" style={{ width: `${Math.min(100, Math.max(0, progress * 100))}%` }} />
       </div>
     </div>
   );

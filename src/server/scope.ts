@@ -83,6 +83,7 @@ export function snapshotFor(c: Ctx, user: SessionUser): Snapshot {
       homeworkProgress: Object.fromEntries(Object.entries(db.homeworkProgress).filter(([k]) => ids.has(k.split("|")[1]))),
       audit: readAudit(c, { entityPrefix: "grade", entityIds: gradeKeys, limit: 300 }),
       userPhotos: pickPhotos(db.userPhotos, new Set([user.id, ...ids, ...visibleTeachers.map((t) => t.id)])),
+      scheduleChanges: db.scheduleChanges.filter((c) => groupIds.has(c.groupId)),
     };
   }
 
@@ -117,6 +118,7 @@ export function snapshotFor(c: Ctx, user: SessionUser): Snapshot {
       homeworkProgress: Object.fromEntries(Object.entries(db.homeworkProgress).filter(([k]) => ids.has(k.split("|")[1]))),
       audit: readAudit(c, { entityPrefix: "grade", entityIds: Object.keys(grades), limit: 500 }),
       userPhotos: pickPhotos(db.userPhotos, new Set([user.id, ...ids, ...visibleTeachersT.map((t) => t.id)])),
+      scheduleChanges: db.scheduleChanges.filter((c) => groupIds.has(c.groupId)),
     };
   }
 
@@ -138,6 +140,7 @@ export function snapshotFor(c: Ctx, user: SessionUser): Snapshot {
       studentAvg: studentAverages(db),
       audit: readAudit(c, { limit: 300 }),
       userPhotos: db.userPhotos,
+      scheduleChanges: db.scheduleChanges,
     };
   }
 
@@ -156,5 +159,6 @@ export function snapshotFor(c: Ctx, user: SessionUser): Snapshot {
     homeworkProgress: {},
     audit: readAudit(c, { limit: 300 }).map((e) => ({ ...e, before: null, after: null, reason: e.reason ? "скрыто" : null })),
     userPhotos: pickPhotos(db.userPhotos, new Set([user.id])),
+    scheduleChanges: [],
   };
 }

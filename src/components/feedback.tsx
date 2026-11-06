@@ -45,8 +45,8 @@ export function Toaster() {
           key={t.id}
           role="status"
           className={cx(
-            "pointer-events-auto relative left-1/2 flex animate-toast items-start gap-2.5 rounded-lg px-4 py-3 text-sm font-medium whitespace-pre-line text-white shadow-[var(--shadow-pop)]",
-            t.tone === "ok" ? "bg-slate-900" : "bg-rose-600",
+            "pointer-events-auto relative left-1/2 flex animate-toast items-start gap-2.5 rounded-xl px-4 py-3 text-sm font-medium whitespace-pre-line text-white shadow-[var(--shadow-pop)]",
+            t.tone === "ok" ? "bg-nav ring-1 ring-white/10" : "bg-rose-600",
           )}
         >
           <Icon name={t.tone === "ok" ? "check" : "alert"} className={cx("mt-px size-[18px] shrink-0", t.tone === "ok" ? "text-emerald-400" : "text-white")} />
@@ -76,7 +76,7 @@ export function Modal({ open, onClose, title, children, footer, wide }: { open: 
   }, [open, onClose]);
   if (!open || typeof document === "undefined") return null;
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex animate-fade items-end justify-center bg-slate-900/45 sm:items-center sm:p-6" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-[60] flex animate-fade items-end justify-center bg-[#0b1d3d]/45 backdrop-blur-[2px] sm:items-center sm:p-6" onMouseDown={onClose}>
       <div
         ref={ref}
         role="dialog"
@@ -84,12 +84,12 @@ export function Modal({ open, onClose, title, children, footer, wide }: { open: 
         aria-label={title}
         onMouseDown={(e) => e.stopPropagation()}
         className={cx(
-          "safe-bottom flex max-h-[92dvh] w-full animate-sheet flex-col overflow-hidden rounded-t-2xl bg-white shadow-[var(--shadow-pop)] sm:animate-pop sm:rounded-xl",
+          "safe-bottom flex max-h-[92dvh] w-full animate-sheet flex-col overflow-hidden rounded-t-2xl bg-white shadow-[var(--shadow-pop)] sm:animate-pop sm:rounded-2xl",
           wide ? "sm:max-w-3xl" : "sm:max-w-lg",
         )}
       >
         <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3.5">
-          <h2 className="text-base font-semibold text-ink">{title}</h2>
+          <h2 className="text-[16px] font-semibold text-ink">{title}</h2>
           <button onClick={onClose} aria-label="Закрыть" className="grid size-8 place-items-center rounded-md text-muted transition-colors hover:bg-subtle hover:text-ink">
             <Icon name="close" className="size-[18px]" />
           </button>
@@ -137,14 +137,12 @@ export function Skeleton({ className }: { className?: string }) {
 
 export function PageSkeleton() {
   return (
-    <div className="space-y-6" aria-busy="true" aria-label="Загрузка">
-      <Skeleton className="h-10 w-64" />
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
-      </div>
-      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <Skeleton className="h-72 rounded-xl" />
-        <Skeleton className="h-72 rounded-xl" />
+    <div className="space-y-5" aria-busy="true" aria-label="Загрузка">
+      <Skeleton className="h-[220px] rounded-[14px] sm:h-[200px]" />
+      <div className="grid gap-5 lg:grid-cols-12">
+        <Skeleton className="h-80 rounded-xl lg:col-span-5" />
+        <Skeleton className="h-80 rounded-xl lg:col-span-4" />
+        <Skeleton className="hidden h-80 rounded-xl lg:col-span-3 lg:block" />
       </div>
     </div>
   );

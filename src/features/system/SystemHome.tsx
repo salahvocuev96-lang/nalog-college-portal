@@ -2,7 +2,7 @@
 // Кабинет технического администратора: состояние системы и резервные копии. Без доступа к оценкам.
 import { useCallback, useEffect, useState } from "react";
 import { act, fetchJson } from "@/lib/store";
-import { Badge, Button, Card, CardHeader, Empty, PageHeader, StatCard } from "@/components/ui";
+import { Badge, Button, Card, CardHeader, Empty, PageHeader, StatCard, StatGrid } from "@/components/ui";
 import { Skeleton, toastResult, useConfirm } from "@/components/feedback";
 import { Icon } from "@/components/icons";
 import { formatTime } from "@/lib/dates";
@@ -50,13 +50,13 @@ export function SystemHome() {
         subtitle="Мониторинг, база данных и резервное копирование. Учебные данные этой роли недоступны"
         action={<Button variant="outline" onClick={load}><Icon name="history" className="size-4" />Обновить</Button>}
       />
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <StatGrid className="grid-cols-2 lg:grid-cols-4">
         <StatCard label="Статус" value={h.status === "ok" ? "Работает" : "Проблема"} hint={`Проверка БД: ${h.integrity}`} icon="server" tone={h.status === "ok" ? "green" : "red"} />
         <StatCard label="Время работы" value={up} hint={`Node.js ${h.node}`} icon="clock" />
         <StatCard label="Размер базы" value={`${(h.dbSizeKb / 1024).toFixed(1)} МБ`} hint="SQLite, режим WAL" icon="database" tone="gold" />
         <StatCard label="Память процесса" value={`${h.memoryMb} МБ`} hint={h.demoMode ? "Демо-режим включён" : "Рабочий режим"} icon="chart" />
-      </div>
-      <div className="grid gap-6 lg:grid-cols-2">
+      </StatGrid>
+      <div className="grid items-start gap-4 sm:gap-5 lg:grid-cols-2">
         <Card>
           <CardHeader icon="database" title="Резервные копии" action={<Button variant="brand" className="h-9" disabled={busy} onClick={backup}>{busy ? "Создаём…" : "Создать копию"}</Button>} />
           {h.backups.length === 0 ? <Empty icon="database" title="Копий пока нет" text="Создайте первую копию. Для эксплуатации нужно настроить автоматическое копирование по расписанию (см. docs/OPERATIONS.md)" /> : (

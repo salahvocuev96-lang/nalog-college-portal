@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useViewer } from "../useViewer";
-import { AvgBadge, Badge, Card, Empty, GradeChip, PageHeader, Segmented, Select, MiniStat, cx } from "@/components/ui";
+import { AvgBadge, Badge, Card, Empty, GradeChip, PageHeader, Segmented, Select, MiniStat, cx, StatGrid } from "@/components/ui";
 import { Modal } from "@/components/feedback";
 import { formatShort, monthPeriod, MONTHS, semesterByNumber, yearPeriod, academicYear, toISO, type Period } from "@/lib/dates";
 import { average, finalGrade, gradesOf } from "@/lib/stats";
@@ -61,12 +61,12 @@ export function StudentGrades() {
           </div>
         }
       />
-      <div className="mb-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <StatGrid className="mb-5 grid-cols-2 lg:grid-cols-4">
         <MiniStat icon="star" tone="gold" label={`Средний · ${period.label}`} value={total === null ? "-" : total.toFixed(2).replace(".", ",")} />
         <MiniStat icon="chart" label="За учебный год" value={yearAvg === null ? "-" : yearAvg.toFixed(2).replace(".", ",")} />
         <MiniStat icon="check" tone="green" label="Оценок за период" value={rows.reduce((a, r) => a + r.list.length, 0)} />
         <MiniStat icon="book" label="Предметов" value={rows.length} />
-      </div>
+      </StatGrid>
       <Card>
         {rows.length === 0 ? <Empty title="Нет предметов" /> : (
           <ul className="divide-y divide-line">
@@ -77,7 +77,7 @@ export function StudentGrades() {
               <li key={r.subject.id} className="grid grid-cols-[1fr_auto_auto] items-center gap-x-4 gap-y-2 px-4 py-3.5 transition-colors hover:bg-subtle sm:px-5 md:grid-cols-[minmax(0,260px)_1fr_80px_70px]">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-ink">{r.subject.name}</p>
-                  <div className="mt-1.5 h-1 w-full max-w-40 overflow-hidden rounded-full bg-brand-50"><div className={cx("bar-x h-full rounded-full", r.avg === null ? "" : r.avg >= 4.5 ? "bg-emerald-500" : r.avg >= 3.5 ? "bg-brand-600" : r.avg >= 2.5 ? "bg-gold-500" : "bg-rose-500")} style={{ width: `${((r.avg ?? 0) / 5) * 100}%` }} /></div>
+                  <div className="mt-1.5 h-1 w-full max-w-40 overflow-hidden rounded-full bg-brand-50"><div className={cx("bar-x h-full rounded-full", r.avg === null ? "" : r.avg >= 4.5 ? "bg-blue-500" : r.avg >= 3.5 ? "bg-emerald-500" : r.avg >= 2.5 ? "bg-orange-400" : "bg-rose-500")} style={{ width: `${((r.avg ?? 0) / 5) * 100}%` }} /></div>
                 </div>
                 <div className="col-span-3 row-start-2 flex flex-wrap gap-1.5 md:col-span-1 md:row-start-auto">
                   {r.list.length === 0 && <span className="text-xs text-muted">Нет оценок</span>}

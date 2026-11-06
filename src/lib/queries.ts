@@ -8,6 +8,8 @@ export interface LessonView extends ScheduleSlot {
   teacher: string;
   group: string;
   time: string;
+  changeKind?: "cancel" | "substitute";
+  changeNote?: string;
 }
 
 function view(db: DB, s: ScheduleSlot): LessonView {
@@ -20,14 +22,28 @@ function view(db: DB, s: ScheduleSlot): LessonView {
   };
 }
 
+function applyChanges(db: DB, lessons: LessonView[], date: ISODate): LessonView[] {
+  const changes = db.scheduleChanges?.filter((c) => c.date === date) ?? [];
+  if (!changes.length) return lessons;
+  return lessons.map((l) => {
+    const ch = changes.find((c) => c.groupId === l.groupId && c.slot === l.slot);
+    if (!ch) return l;
+    if (ch.kind === "cancel") return { ...l, changeKind: "cancel", changeNote: ch.note };
+    const newTeacher = ch.newTeacherId ? (db.teachers.find((t) => t.id === ch.newTeacherId)?.name ?? l.teacher) : l.teacher;
+    return { ...l, teacherId: ch.newTeacherId ?? l.teacherId, teacher: newTeacher, room: ch.newRoom ?? l.room, changeKind: "substitute", changeNote: ch.note };
+  });
+}
+
 export function groupLessons(db: DB, groupId: ID, date: ISODate): LessonView[] {
   const wd = weekday(date);
-  return db.schedule.filter((s) => s.groupId === groupId && s.weekday === wd).sort((a, b) => a.slot - b.slot).map((s) => view(db, s));
+  const lessons = db.schedule.filter((s) => s.groupId === groupId && s.weekday === wd).sort((a, b) => a.slot - b.slot).map((s) => view(db, s));
+  return applyChanges(db, lessons, date);
 }
 
 export function teacherLessons(db: DB, teacherId: ID, date: ISODate): LessonView[] {
   const wd = weekday(date);
-  return db.schedule.filter((s) => s.teacherId === teacherId && s.weekday === wd).sort((a, b) => a.slot - b.slot).map((s) => view(db, s));
+  const lessons = db.schedule.filter((s) => s.teacherId === teacherId && s.weekday === wd).sort((a, b) => a.slot - b.slot).map((s) => view(db, s));
+  return applyChanges(db, lessons, date);
 }
 
 /** Ближайший учебный день начиная с даты (воскресенье пропускаем) */

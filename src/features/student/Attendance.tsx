@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useViewer } from "../useViewer";
-import { Card, CardHeader, Empty, PageHeader, Segmented, StatCard, cx } from "@/components/ui";
+import { Card, CardHeader, Empty, PageHeader, Segmented, StatCard, cx, StatGrid } from "@/components/ui";
 import { formatShort, periodFor, today, type PeriodKind } from "@/lib/dates";
 import { attendanceSummary } from "@/lib/stats";
 import { subjectName } from "@/lib/queries";
@@ -29,12 +29,12 @@ export function StudentAttendance() {
         subtitle="Опоздание засчитывается как присутствие"
         action={<Segmented value={kind} onChange={setKind} options={[{ value: "month", label: "Месяц" }, { value: "semester", label: "Семестр" }, { value: "year", label: "Год" }]} />}
       />
-      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <StatGrid className="mb-6 grid-cols-2 lg:grid-cols-4">
         <StatCard label="Присутствие" value={`${sum.rate}%`} hint={`${sum.total} занятий`} icon="check" tone={sum.rate >= 90 ? "green" : "red"} />
         <StatCard label="Пропуски «Н»" value={sum.absent} hint="без уважительной причины" icon="close" tone="red" />
         <StatCard label="Болезнь «Б»" value={sum.sick} hint="по уважительной причине" icon="shield" />
         <StatCard label="Опоздания" value={sum.late} hint="засчитаны как присутствие" icon="calendar" tone="gold" />
-      </div>
+      </StatGrid>
       <Card>
         <CardHeader icon="check" title="Отметки за период" />
         {misses.length === 0 ? <Empty icon="check" title="Пропусков нет" text="Все занятия посещены" /> : (

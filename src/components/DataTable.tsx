@@ -40,9 +40,9 @@ export function DataTable<T>({ rows, columns, rowKey, empty = "Ничего не
       <div className="hidden md:block scroll-x">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-line bg-subtle text-left text-xs font-medium text-muted">
+            <tr className="border-b border-line bg-subtle text-left text-[11px] font-semibold uppercase tracking-wider text-muted">
               {columns.map((c) => (
-                <th key={c.key} className={cx("h-10 px-4 font-medium first:pl-5", c.className)}>
+                <th key={c.key} className={cx("h-9 px-4 font-semibold first:pl-5", c.className)}>
                   {c.sort ? (
                     <button onClick={() => setSort((s) => (s?.key === c.key ? { key: c.key, dir: s.dir === 1 ? -1 : 1 } : { key: c.key, dir: 1 }))} className="inline-flex items-center gap-1 hover:text-ink" aria-label={`Сортировать: ${c.label}`}>
                       {c.label}
@@ -56,7 +56,7 @@ export function DataTable<T>({ rows, columns, rowKey, empty = "Ничего не
           <tbody className="divide-y divide-line">
             {shown.map((r) => (
               <tr key={rowKey(r)} onClick={onRowClick && (() => onRowClick(r))} className={cx("transition-colors duration-100 hover:bg-subtle", onRowClick && "cursor-pointer")}>
-                {columns.map((c) => <td key={c.key} className={cx("px-4 py-3 first:pl-5", c.className)}>{c.render(r)}</td>)}
+                {columns.map((c) => <td key={c.key} className={cx("px-4 py-2.5 first:pl-5", c.className)}>{c.render(r)}</td>)}
               </tr>
             ))}
           </tbody>

@@ -135,6 +135,19 @@ export interface SessionUser {
   photo?: string;
 }
 
+/** Замена / отмена пары на конкретную дату */
+export interface ScheduleChange {
+  id: number;
+  date: ISODate;
+  groupId: ID;
+  slot: number;
+  kind: "cancel" | "substitute";
+  newTeacherId?: ID;
+  newRoom?: string;
+  note?: string;
+  createdAt: number;
+}
+
 /** Запись журнала аудита. Таблица в БД защищена триггерами от изменения и удаления */
 export interface AuditEntry {
   id: number;
