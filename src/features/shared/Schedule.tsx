@@ -45,11 +45,22 @@ export function Schedule() {
   const [edit, setEdit] = useState<{ weekday: number; slot: number } | null>(null);
 
   const week = addDays(startOfWeek(now), weekOffset * 7);
-  const lessonsOf = (wd: number) =>
-    db.schedule
+  const lessonsOf = (wd: number): LessonView[] => {
+    const date = addDays(week, wd - 1);
+    const base = db.schedule
       .filter((s) => s.weekday === wd && (mode === "teacher" ? s.teacherId === teacherId : s.groupId === groupId))
       .sort((a, b) => a.slot - b.slot)
       .map((s) => view(db, s));
+    const changes = (db.scheduleChanges ?? []).filter((c) => c.date === date);
+    if (!changes.length) return base;
+    return base.map((l) => {
+      const ch = changes.find((c) => c.groupId === l.groupId && c.slot === l.slot);
+      if (!ch) return l;
+      if (ch.kind === "cancel") return { ...l, changeKind: "cancel" as const, changeNote: ch.note };
+      const newTeacher = ch.newTeacherId ? (db.teachers.find((t) => t.id === ch.newTeacherId)?.name ?? l.teacher) : l.teacher;
+      return { ...l, teacher: newTeacher, room: ch.newRoom ?? l.room, changeKind: "substitute" as const, changeNote: ch.note };
+    });
+  };
 
   const group = db.groups.find((g) => g.id === groupId);
   const groupOptions = db.groups.filter((g) => g.code.toLowerCase().includes(q.trim().toLowerCase()));
@@ -150,11 +161,16 @@ function DayCard({ date, wd, lessons, teacherView, isTeacher, now, compact, edit
                 </div>
                 {l ? (
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium leading-snug">{l.subject}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className={cx("text-sm font-medium leading-snug", l.changeKind === "cancel" && "text-muted line-through")}>{l.subject}</p>
+                      {l.changeKind === "cancel" && <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-700">Отменено</span>}
+                      {l.changeKind === "substitute" && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">Замена</span>}
+                    </div>
                     <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted">
                       <span>{teacherView ? `Группа ${l.group}` : l.teacher}</span>
                       {l.room && <span className="inline-flex items-center gap-1"><Icon name="home" className="size-3" />{/^\d/.test(l.room) ? `ауд. ${l.room}` : l.room}</span>}
                     </p>
+                    {l.changeNote && <p className="mt-0.5 text-xs italic text-muted">{l.changeNote}</p>}
                   </div>
                 ) : <p className="self-center text-sm text-muted/70">{editable ? "Свободно · добавить" : "—"}</p>}
                 {journalHref && <span className="self-center text-xs font-semibold text-brand-700"><Icon name="journal" className="size-[18px]" /></span>}

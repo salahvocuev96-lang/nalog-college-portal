@@ -62,6 +62,7 @@ export const NAV: Record<Role, NavItem[]> = {
     I("/accounts/", "Аккаунты", "key"),
     I("/groups/", "Группы", "layers", "Группы", { ...S("Учебный процесс"), ...P }),
     I("/schedule/", "Расписание", "calendar", "Пары", P),
+    I("/changes/", "Замены в расписании", "calendar", "Замены"),
     I("/subjects/", "Предметы", "book"),
     I("/loads/", "Назначения", "link"),
     I("/settings/", "Учебные периоды", "settings", "Периоды"),

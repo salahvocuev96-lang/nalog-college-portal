@@ -2,7 +2,7 @@
 // Сервер собирает её из SQLite и отдаёт каждому пользователю только разрешённую часть (src/server/scope.ts).
 import type {
   Attendance, AuditEntry, Grade, Group, Homework, HomeworkProgress, Load, Message, Notification,
-  Parent, ScheduleSlot, Settings, Staff, Student, Subject, Teacher,
+  Parent, ScheduleChange, ScheduleSlot, Settings, Staff, Student, Subject, Teacher,
 } from "./types";
 
 export interface DB {
@@ -22,6 +22,7 @@ export interface DB {
   notifications: Notification[];
   settings: Settings;
   userPhotos: Record<string, string>; // userId → base64 data URL
+  scheduleChanges: ScheduleChange[];
 }
 
 /** Агрегаты для администрации: сырые оценки ей не передаются */
@@ -41,7 +42,7 @@ export interface Snapshot extends DB {
   studentAvg?: Record<string, number | null>;
 }
 
-export const EMPTY_DB_EXTRAS = { userPhotos: {} as Record<string, string> };
+export const EMPTY_DB_EXTRAS = { userPhotos: {} as Record<string, string>, scheduleChanges: [] as ScheduleChange[] };
 
 export const DEFAULT_SETTINGS: Settings = {
   semester1: { from: "09-01", to: "12-31" },

@@ -59,8 +59,17 @@ export function loadDB(sql: DatabaseSync): DB {
     })),
     settings: loadSettings(sql),
     userPhotos: {},
+    scheduleChanges: [],
   };
   for (const r of all(sql, "SELECT id, photo FROM users WHERE photo IS NOT NULL")) db.userPhotos[S(r.id)] = S(r.photo);
+  db.scheduleChanges = (all(sql, "SELECT * FROM schedule_changes ORDER BY date, slot") as Record<string, unknown>[]).map((r) => ({
+    id: N(r.id), date: S(r.date), groupId: S(r.group_id), slot: N(r.slot),
+    kind: S(r.kind) as "cancel" | "substitute",
+    newTeacherId: r.new_teacher_id ? S(r.new_teacher_id) : undefined,
+    newRoom: r.new_room !== null && r.new_room !== undefined ? S(r.new_room) : undefined,
+    note: r.note ? S(r.note) : undefined,
+    createdAt: N(r.created_at),
+  }));
   for (const r of all(sql, "SELECT * FROM grades")) {
     const g: Grade = { studentId: S(r.student_id), subjectId: S(r.subject_id), date: S(r.date), value: N(r.value) as Grade["value"], teacherId: S(r.teacher_id), updatedAt: N(r.updated_at) };
     db.grades[key(g.studentId, g.subjectId, g.date)] = g;

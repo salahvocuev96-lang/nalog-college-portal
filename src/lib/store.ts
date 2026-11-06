@@ -11,7 +11,7 @@ export type Result = { ok: true; info?: string; data?: unknown } | { ok: false; 
 const EMPTY: Snapshot = {
   groups: [], students: [], parents: [], teachers: [], staff: [], subjects: [], schedule: [], loads: [],
   grades: {}, attendance: {}, homework: [], homeworkProgress: {}, messages: [], notifications: [],
-  settings: DEFAULT_SETTINGS, groupStats: [], audit: [], serverToday: "", userPhotos: {},
+  settings: DEFAULT_SETTINGS, groupStats: [], audit: [], serverToday: "", userPhotos: {}, scheduleChanges: [],
 };
 
 let snapshot: Snapshot = EMPTY;
