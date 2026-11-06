@@ -114,7 +114,7 @@ export async function act(type: string, payload: unknown = {}): Promise<Result> 
   const r = await request("/api/action", { type, payload });
   pending--;
   if (r.status === 401) {
-    apply({ user: null });
+    window.location.assign("/?expired=1");
     return { ok: false, error: "Сессия истекла, войдите снова" };
   }
   if (r.data.snapshot) apply({ snapshot: r.data.snapshot as Snapshot });

@@ -1,4 +1,5 @@
 // Страница входа. Серверный компонент: цифры колледжа берутся из базы, форма работает на клиенте.
+import { Suspense } from "react";
 import { Crest } from "@/components/Crest";
 import { Icon, type IconName } from "@/components/icons";
 import { LoginForm } from "@/features/auth/LoginForm";
@@ -57,7 +58,7 @@ export default function LoginPage() {
 
       {/* Правая панель — форма входа */}
       <section className="relative flex flex-col justify-center bg-page px-5 pb-10 sm:px-10 lg:bg-white lg:px-14 lg:py-10">
-        <LoginForm demo={isDemoMode()} />
+        <Suspense><LoginForm demo={isDemoMode()} /></Suspense>
       </section>
     </div>
   );

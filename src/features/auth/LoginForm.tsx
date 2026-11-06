@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Crest } from "@/components/Crest";
 import { Icon, type IconName } from "@/components/icons";
 import { Button, Field, cx, inputCls } from "@/components/ui";
@@ -24,6 +25,7 @@ export function LoginForm({ demo }: { demo: boolean }) {
   const [recover, setRecover] = useState(false);
   const [recoverLogin, setRecoverLogin] = useState("");
   const [recoverMsg, setRecoverMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const expired = useSearchParams().get("expired") === "1";
 
   const done = (r: { ok: boolean; error?: string }) => {
     // Полная навигация: кэш роутера мог запомнить переадресацию, сделанную до входа
@@ -57,6 +59,12 @@ export function LoginForm({ demo }: { demo: boolean }) {
       <h2 className="text-[26px] font-semibold tracking-tight text-ink">Вход в&nbsp;личный кабинет</h2>
       <p className="mt-1.5 text-sm text-muted">Логин и&nbsp;временный пароль выдаёт учебная часть колледжа</p>
 
+      {expired && (
+        <p className="mt-4 flex items-start gap-2 rounded-xl bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
+          <Icon name="alert" className="mt-px size-4 shrink-0" />
+          Сессия истекла. Войдите снова, чтобы продолжить работу.
+        </p>
+      )}
       <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
         <Field label="Логин">
           <input className={cx(inputCls, "h-12")} autoComplete="username" value={name} onChange={(e) => setName(e.target.value)} autoCapitalize="none" spellCheck={false} />
