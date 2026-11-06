@@ -8,9 +8,9 @@ import { SESSION_COOKIE, SESSION_TTL_MS, userFromToken } from "./auth";
 import { snapshotFor } from "./scope";
 
 export async function currentUser(): Promise<SessionUser | null> {
-  const c = getContext();
+  const c = await getContext();
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  return userFromToken(c.sql, c.db, token);
+  return userFromToken(c.client, c.db, token);
 }
 
 export const json = (data: unknown, status = 200) => NextResponse.json(data, { status, headers: { "Cache-Control": "no-store" } });
@@ -37,8 +37,7 @@ export async function readJson(req: Request): Promise<Record<string, unknown>> {
   }
 }
 
-export function sessionPayload(user: SessionUser) {
-  const c = getContext();
+export function sessionPayload(c: Awaited<ReturnType<typeof getContext>>, user: SessionUser) {
   return { user, snapshot: user.mustChangePassword ? null : snapshotFor(c, user) };
 }
 

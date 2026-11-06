@@ -6,6 +6,7 @@ import type {
 } from "./types";
 
 export interface DB {
+  auditLog: AuditEntry[]; // последние 1000 записей аудита, для snapshotFor
   groups: Group[];
   students: Student[];
   parents: Parent[];

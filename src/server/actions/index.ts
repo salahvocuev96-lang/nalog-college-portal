@@ -1,5 +1,5 @@
 // Диспетчер действий: единая точка изменения данных.
-// Каждое действие выполняется в транзакции; при ошибке база откатывается, кэш перечитывается.
+// Записи буферизуются в c._pending и фиксируются одним batch после успешного действия.
 import "server-only";
 import { ZodError } from "zod";
 import type { SessionUser } from "@/lib/types";
@@ -10,7 +10,9 @@ import { messageActions } from "./messages";
 import { adminActions } from "./admin";
 import { systemActions } from "./system";
 
-const handlers: Record<string, (c: Ctx, u: SessionUser, raw: unknown) => Result> = {
+type Handler = (c: Ctx, u: SessionUser, raw: unknown) => Result | Promise<Result>;
+
+const handlers: Record<string, Handler> = {
   ...journalActions,
   ...messageActions,
   ...adminActions,
@@ -19,32 +21,26 @@ const handlers: Record<string, (c: Ctx, u: SessionUser, raw: unknown) => Result>
 
 export const ACTION_TYPES = Object.keys(handlers);
 
-export function runAction(c: Ctx, user: SessionUser, type: string, payload: unknown): Result {
+export async function runAction(c: Ctx, user: SessionUser, type: string, payload: unknown): Promise<Result> {
   const h = handlers[type];
   if (!h) return fail("Неизвестное действие");
   if (user.mustChangePassword) return fail("Сначала смените временный пароль");
-  // VACUUM нельзя выполнять внутри транзакции
-  if (type === "system.backup") return safe(() => h(c, user, payload));
-  c.sql.exec("BEGIN");
+
+  c._pending = [];
   try {
-    const r = h(c, user, payload);
-    if (r.ok) c.sql.exec("COMMIT");
-    else {
-      c.sql.exec("ROLLBACK");
-      c.db = loadDB(c.sql);
+    const r = await Promise.resolve(h(c, user, payload));
+    if (r.ok) {
+      if (c._pending.length > 0) {
+        await c.client.batch(c._pending, "write");
+      }
+    } else {
+      c.db = await loadDB(c.client);
     }
+    c._pending = undefined;
     return r;
   } catch (e) {
-    c.sql.exec("ROLLBACK");
-    c.db = loadDB(c.sql);
-    return errorResult(e);
-  }
-}
-
-function safe(fn: () => Result): Result {
-  try {
-    return fn();
-  } catch (e) {
+    c._pending = undefined;
+    c.db = await loadDB(c.client);
     return errorResult(e);
   }
 }

@@ -1,11 +1,10 @@
 // Пароли, сессии и учётные записи
 import "server-only";
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
-import type { DatabaseSync } from "node:sqlite";
+import type { Client } from "./turso";
 import type { DB } from "@/lib/db-types";
 import type { Account, ID, PasswordResetRequest, Role, SessionUser } from "@/lib/types";
 import { DEMO_PASSWORD, DEMO_TEMP_PASSWORD, demoAccounts } from "./seed";
-import { transaction } from "./sqlite";
 
 export const SESSION_COOKIE = "nk_session";
 export const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 дней
@@ -52,13 +51,28 @@ interface UserRow {
   must_change_password: number;
   active: number;
   created_at: number;
+  photo?: string | null;
 }
 
-export function seedAccounts(sql: DatabaseSync, db: DB) {
-  const ins = sql.prepare("INSERT INTO users (id, login, password_hash, role, must_change_password, active, created_at) VALUES (?, ?, ?, ?, ?, 1, ?)");
-  transaction(sql, () => {
-    for (const a of demoAccounts(db)) ins.run(a.id, a.login, hashPassword(a.temp ? DEMO_TEMP_PASSWORD : DEMO_PASSWORD), a.role, a.temp ? 1 : 0, Date.now());
-  });
+function rowToUser(r: Record<string, unknown>): UserRow {
+  return {
+    id: String(r.id ?? ""),
+    login: String(r.login ?? ""),
+    password_hash: String(r.password_hash ?? ""),
+    role: String(r.role ?? "") as Role,
+    must_change_password: Number(r.must_change_password ?? 0),
+    active: Number(r.active ?? 0),
+    created_at: Number(r.created_at ?? 0),
+    photo: r.photo != null ? String(r.photo) : null,
+  };
+}
+
+export async function seedAccounts(client: Client, db: DB) {
+  const stmts = demoAccounts(db).map((a) => ({
+    sql: "INSERT INTO users (id, login, password_hash, role, must_change_password, active, created_at) VALUES (?, ?, ?, ?, ?, 1, ?)",
+    args: [a.id, a.login, hashPassword(a.temp ? DEMO_TEMP_PASSWORD : DEMO_PASSWORD), a.role, a.temp ? 1 : 0, Date.now()],
+  }));
+  for (const s of stmts) await client.execute(s);
 }
 
 export function personName(db: DB, id: ID): string {
@@ -71,65 +85,78 @@ export function personName(db: DB, id: ID): string {
   );
 }
 
-export function findUserByLogin(sql: DatabaseSync, login: string): UserRow | undefined {
-  return sql.prepare("SELECT * FROM users WHERE login = ?").get(login.trim().toLowerCase()) as UserRow | undefined;
+export async function findUserByLogin(client: Client, login: string): Promise<UserRow | undefined> {
+  const r = await client.execute({ sql: "SELECT * FROM users WHERE login = ?", args: [login.trim().toLowerCase()] });
+  return r.rows[0] ? rowToUser(r.rows[0] as unknown as Record<string, unknown>) : undefined;
 }
 
-export function findUserById(sql: DatabaseSync, id: ID): UserRow | undefined {
-  return sql.prepare("SELECT * FROM users WHERE id = ?").get(id) as UserRow | undefined;
+export async function findUserById(client: Client, id: ID): Promise<UserRow | undefined> {
+  const r = await client.execute({ sql: "SELECT * FROM users WHERE id = ?", args: [id] });
+  return r.rows[0] ? rowToUser(r.rows[0] as unknown as Record<string, unknown>) : undefined;
 }
 
-export function listAccounts(sql: DatabaseSync, db: DB): Account[] {
-  return (sql.prepare("SELECT * FROM users ORDER BY created_at DESC").all() as unknown as UserRow[]).map((u) => ({
-    id: u.id, login: u.login, role: u.role, name: personName(db, u.id), mustChangePassword: u.must_change_password === 1, active: u.active === 1, createdAt: u.created_at,
-  }));
+export async function listAccounts(client: Client, db: DB): Promise<Account[]> {
+  const r = await client.execute("SELECT * FROM users ORDER BY created_at DESC");
+  return (r.rows as unknown as Record<string, unknown>[]).map((u) => {
+    const row = rowToUser(u);
+    return { id: row.id, login: row.login, role: row.role, name: personName(db, row.id), mustChangePassword: row.must_change_password === 1, active: row.active === 1, createdAt: row.created_at };
+  });
 }
 
-export function createAccount(sql: DatabaseSync, id: ID, login: string, role: Role): string {
+export async function createAccount(client: Client, id: ID, login: string, role: Role): Promise<string> {
   const temp = generateTempPassword();
-  sql.prepare("INSERT INTO users (id, login, password_hash, role, must_change_password, active, created_at) VALUES (?, ?, ?, ?, 1, 1, ?)").run(id, login.trim().toLowerCase(), hashPassword(temp), role, Date.now());
+  await client.execute({ sql: "INSERT INTO users (id, login, password_hash, role, must_change_password, active, created_at) VALUES (?, ?, ?, ?, 1, 1, ?)", args: [id, login.trim().toLowerCase(), hashPassword(temp), role, Date.now()] });
   return temp;
 }
 
-export function resetPassword(sql: DatabaseSync, id: ID): string {
+export async function resetPassword(client: Client, id: ID): Promise<string> {
   const temp = generateTempPassword();
-  sql.prepare("UPDATE users SET password_hash = ?, must_change_password = 1 WHERE id = ?").run(hashPassword(temp), id);
-  sql.prepare("DELETE FROM sessions WHERE user_id = ?").run(id);
+  await client.batch([
+    { sql: "UPDATE users SET password_hash = ?, must_change_password = 1 WHERE id = ?", args: [hashPassword(temp), id] },
+    { sql: "DELETE FROM sessions WHERE user_id = ?", args: [id] },
+  ], "write");
   return temp;
 }
 
-export function setPassword(sql: DatabaseSync, id: ID, password: string) {
-  sql.prepare("UPDATE users SET password_hash = ?, must_change_password = 0 WHERE id = ?").run(hashPassword(password), id);
+export async function setPassword(client: Client, id: ID, password: string) {
+  await client.execute({ sql: "UPDATE users SET password_hash = ?, must_change_password = 0 WHERE id = ?", args: [hashPassword(password), id] });
 }
 
-export function setActive(sql: DatabaseSync, id: ID, active: boolean) {
-  sql.prepare("UPDATE users SET active = ? WHERE id = ?").run(active ? 1 : 0, id);
-  if (!active) sql.prepare("DELETE FROM sessions WHERE user_id = ?").run(id);
+export async function setActive(client: Client, id: ID, active: boolean) {
+  const stmts: { sql: string; args: unknown[] }[] = [
+    { sql: "UPDATE users SET active = ? WHERE id = ?", args: [active ? 1 : 0, id] },
+  ];
+  if (!active) stmts.push({ sql: "DELETE FROM sessions WHERE user_id = ?", args: [id] });
+  await client.batch(stmts as Parameters<typeof client.batch>[0], "write");
 }
 
-// ---------- Сессии: в cookie случайный токен, в базе только его SHA-256 ----------
+// ---------- Сессии ----------
 
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
 
-export function createSession(sql: DatabaseSync, userId: ID): string {
+export async function createSession(client: Client, userId: ID): Promise<string> {
   const token = randomBytes(32).toString("base64url");
   const now = Date.now();
-  sql.prepare("DELETE FROM sessions WHERE expires_at < ?").run(now);
-  sql.prepare("INSERT INTO sessions (token_hash, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)").run(sha(token), userId, now, now + SESSION_TTL_MS);
+  await client.batch([
+    { sql: "DELETE FROM sessions WHERE expires_at < ?", args: [now] },
+    { sql: "INSERT INTO sessions (token_hash, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)", args: [sha(token), userId, now, now + SESSION_TTL_MS] },
+  ], "write");
   return token;
 }
 
-export function destroySession(sql: DatabaseSync, token: string) {
-  sql.prepare("DELETE FROM sessions WHERE token_hash = ?").run(sha(token));
+export async function destroySession(client: Client, token: string) {
+  await client.execute({ sql: "DELETE FROM sessions WHERE token_hash = ?", args: [sha(token)] });
 }
 
-export function userFromToken(sql: DatabaseSync, db: DB, token: string | undefined): SessionUser | null {
+export async function userFromToken(client: Client, db: DB, token: string | undefined): Promise<SessionUser | null> {
   if (!token) return null;
-  const row = sql
-    .prepare("SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ? AND u.active = 1")
-    .get(sha(token), Date.now()) as UserRow | undefined;
-  if (!row) return null;
-  const photo = (row as UserRow & { photo?: string | null }).photo ?? undefined;
+  const r = await client.execute({
+    sql: "SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ? AND u.active = 1",
+    args: [sha(token), Date.now()],
+  });
+  if (!r.rows[0]) return null;
+  const row = rowToUser(r.rows[0] as unknown as Record<string, unknown>);
+  const photo = row.photo ?? undefined;
   return { id: row.id, role: row.role, login: row.login, name: personName(db, row.id), mustChangePassword: row.must_change_password === 1, ...(photo ? { photo } : {}) };
 }
 
@@ -143,26 +170,24 @@ export function loginBlocked(login: string): number {
 export function registerFailure(login: string) {
   const a = attempts.get(login) ?? { n: 0, until: 0 };
   a.n++;
-  if (a.n >= 5) {
-    a.until = Date.now() + 60_000;
-    a.n = 0;
-  }
+  if (a.n >= 5) { a.until = Date.now() + 60_000; a.n = 0; }
   attempts.set(login, a);
 }
 export const clearFailures = (login: string) => attempts.delete(login);
 
-// ---------- Восстановление пароля: заявка уходит администрации ----------
+// ---------- Восстановление пароля ----------
 
-export function createResetRequest(sql: DatabaseSync, login: string) {
-  sql.prepare("INSERT INTO password_reset_requests (login, at) VALUES (?, ?)").run(login.trim().toLowerCase().slice(0, 64), Date.now());
+export async function createResetRequest(client: Client, login: string) {
+  await client.execute({ sql: "INSERT INTO password_reset_requests (login, at) VALUES (?, ?)", args: [login.trim().toLowerCase().slice(0, 64), Date.now()] });
 }
 
-export function listResetRequests(sql: DatabaseSync): PasswordResetRequest[] {
-  return (sql.prepare("SELECT * FROM password_reset_requests ORDER BY id DESC LIMIT 50").all() as Record<string, unknown>[]).map((r) => ({
-    id: Number(r.id), login: String(r.login), at: Number(r.at), status: String(r.status) as "open" | "done",
+export async function listResetRequests(client: Client): Promise<PasswordResetRequest[]> {
+  const r = await client.execute("SELECT * FROM password_reset_requests ORDER BY id DESC LIMIT 50");
+  return (r.rows as unknown as Record<string, unknown>[]).map((row) => ({
+    id: Number(row.id), login: String(row.login), at: Number(row.at), status: String(row.status) as "open" | "done",
   }));
 }
 
-export function closeResetRequest(sql: DatabaseSync, id: number) {
-  sql.prepare("UPDATE password_reset_requests SET status = 'done' WHERE id = ?").run(id);
+export async function closeResetRequest(client: Client, id: number) {
+  await client.execute({ sql: "UPDATE password_reset_requests SET status = 'done' WHERE id = ?", args: [id] });
 }

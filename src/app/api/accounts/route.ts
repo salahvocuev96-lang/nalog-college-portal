@@ -7,6 +7,6 @@ export async function GET() {
   const user = await currentUser();
   if (!user) return unauthorized();
   if (user.role !== "college_admin") return forbidden();
-  const c = getContext();
-  return json({ accounts: listAccounts(c.sql, c.db), requests: listResetRequests(c.sql) });
+  const c = await getContext();
+  return json({ accounts: await listAccounts(c.client, c.db), requests: await listResetRequests(c.client) });
 }

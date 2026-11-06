@@ -190,7 +190,7 @@ export function buildSeed(): DB {
     groups, students, parents, teachers, staff: STAFF,
     subjects: [...subjects.values()].sort((a, b) => a.name.localeCompare(b.name, "ru")),
     schedule, loads: [...loadSet.values()], grades, attendance, homework,
-    homeworkProgress: {}, messages: [], notifications: [], settings: DEFAULT_SETTINGS, userPhotos: {}, scheduleChanges: [],
+    homeworkProgress: {}, messages: [], notifications: [], settings: DEFAULT_SETTINGS, userPhotos: {}, scheduleChanges: [], auditLog: [],
   };
   addDemoConversation(db);
   return db;

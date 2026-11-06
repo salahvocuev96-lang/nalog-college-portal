@@ -7,6 +7,7 @@ import { translit } from "@/lib/names";
 import type { Role, SessionUser } from "@/lib/types";
 import { audit, repo, type Ctx } from "../repo";
 import { closeResetRequest, createAccount, findUserById, findUserByLogin, resetPassword, setActive } from "../auth";
+import type { InValue } from "../turso";
 import { fail, notify, ok, requireRole, subjName, uid, type Result } from "./common";
 
 const name = z.string().trim().min(3, "Слишком короткое имя").max(120);
@@ -159,9 +160,12 @@ export const adminActions = {
     }).parse(raw);
     if (!c.db.groups.some((g) => g.id === p.groupId)) return fail("Группа не найдена");
     if (p.newTeacherId && !c.db.teachers.some((t) => t.id === p.newTeacherId)) return fail("Преподаватель не найден");
-    c.sql.prepare(
-      "INSERT INTO schedule_changes (date, group_id, slot, kind, new_teacher_id, new_room, note, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(date, group_id, slot) DO UPDATE SET kind=excluded.kind, new_teacher_id=excluded.new_teacher_id, new_room=excluded.new_room, note=excluded.note, created_at=excluded.created_at"
-    ).run(p.date, p.groupId, p.slot, p.kind, p.newTeacherId ?? null, p.newRoom ?? null, p.note ?? null, Date.now());
+    const changeArgs: InValue[] = [p.date, p.groupId, p.slot, p.kind, p.newTeacherId ?? null, p.newRoom ?? null, p.note ?? null, Date.now()];
+    if (c._pending) {
+      c._pending.push({ sql: "INSERT INTO schedule_changes (date, group_id, slot, kind, new_teacher_id, new_room, note, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(date, group_id, slot) DO UPDATE SET kind=excluded.kind, new_teacher_id=excluded.new_teacher_id, new_room=excluded.new_room, note=excluded.note, created_at=excluded.created_at", args: changeArgs });
+    } else {
+      void c.client.execute({ sql: "INSERT INTO schedule_changes (date, group_id, slot, kind, new_teacher_id, new_room, note, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(date, group_id, slot) DO UPDATE SET kind=excluded.kind, new_teacher_id=excluded.new_teacher_id, new_room=excluded.new_room, note=excluded.note, created_at=excluded.created_at", args: changeArgs });
+    }
     const g = c.db.groups.find((x) => x.id === p.groupId)!;
     const slot = c.db.schedule.find((s) => s.groupId === p.groupId && s.slot === p.slot);
     const subj = slot ? (c.db.subjects.find((s) => s.id === slot.subjectId)?.name ?? "") : `${p.slot} пара`;
@@ -176,7 +180,11 @@ export const adminActions = {
   }),
   "schedule.removeChange": admin((c, u, raw) => {
     const p = z.object({ date: z.string(), groupId: id, slot: z.number().int().min(1).max(8) }).parse(raw);
-    c.sql.prepare("DELETE FROM schedule_changes WHERE date = ? AND group_id = ? AND slot = ?").run(p.date, p.groupId, p.slot);
+    if (c._pending) {
+      c._pending.push({ sql: "DELETE FROM schedule_changes WHERE date = ? AND group_id = ? AND slot = ?", args: [p.date, p.groupId, p.slot] });
+    } else {
+      void c.client.execute({ sql: "DELETE FROM schedule_changes WHERE date = ? AND group_id = ? AND slot = ?", args: [p.date, p.groupId, p.slot] });
+    }
     c.db.scheduleChanges = c.db.scheduleChanges.filter((x) => !(x.date === p.date && x.groupId === p.groupId && x.slot === p.slot));
     return ok("Замена удалена, расписание восстановлено");
   }),
@@ -204,41 +212,41 @@ export const adminActions = {
     log(c, u, "announcement.send", "announcement", p.audience, { title: p.title, recipients: ids.length });
     return ok(`Объявление отправлено: ${ids.length} получателей`);
   }),
-  "account.create": admin((c, u, raw) => {
+  "account.create": admin(async (c, u, raw) => {
     const p = z.object({ personId: id, login: z.string().trim().toLowerCase().regex(/^[a-z0-9._-]{3,32}$/, "Логин: латиница, цифры, точка, дефис, 3-32 символа") }).parse(raw);
     let role: Role | null = null;
     if (c.db.students.some((x) => x.id === p.personId)) role = "student";
     else if (c.db.teachers.some((x) => x.id === p.personId)) role = "teacher";
     else if (c.db.parents.some((x) => x.id === p.personId)) role = "parent";
     if (!role) return fail("Человек не найден");
-    if (findUserById(c.sql, p.personId)) return fail("У этого человека уже есть учётная запись");
-    if (findUserByLogin(c.sql, p.login)) return fail("Логин занят");
-    const temp = createAccount(c.sql, p.personId, p.login, role);
+    if (await findUserById(c.client, p.personId)) return fail("У этого человека уже есть учётная запись");
+    if (await findUserByLogin(c.client, p.login)) return fail("Логин занят");
+    const temp = await createAccount(c.client, p.personId, p.login, role);
     log(c, u, "account.create", "user", p.personId, { login: p.login, role });
     return ok("Учётная запись создана", { login: p.login, tempPassword: temp });
   }),
-  "account.resetPassword": admin((c, u, raw) => {
+  "account.resetPassword": admin(async (c, u, raw) => {
     const p = z.object({ id, requestId: z.number().optional() }).parse(raw);
-    const user = findUserById(c.sql, p.id);
+    const user = await findUserById(c.client, p.id);
     if (!user) return fail("Учётная запись не найдена");
     if (user.role === "tech_admin" || user.role === "college_admin") return fail("Пароль сотрудника администрации сбрасывается техническим администратором");
-    const temp = resetPassword(c.sql, p.id);
-    if (p.requestId) closeResetRequest(c.sql, p.requestId);
+    const temp = await resetPassword(c.client, p.id);
+    if (p.requestId) await closeResetRequest(c.client, p.requestId);
     log(c, u, "account.resetPassword", "user", p.id, { mustChangePassword: true });
     return ok("Выдан временный пароль", { login: user.login, tempPassword: temp });
   }),
-  "account.setActive": admin((c, u, raw) => {
+  "account.setActive": admin(async (c, u, raw) => {
     const p = z.object({ id, active: z.boolean() }).parse(raw);
     if (p.id === u.id) return fail("Нельзя заблокировать самого себя");
-    const user = findUserById(c.sql, p.id);
+    const user = await findUserById(c.client, p.id);
     if (!user) return fail("Учётная запись не найдена");
-    setActive(c.sql, p.id, p.active);
+    await setActive(c.client, p.id, p.active);
     log(c, u, p.active ? "account.unblock" : "account.block", "user", p.id, { active: p.active });
     return ok(p.active ? "Доступ восстановлен" : "Доступ заблокирован");
   }),
-  "resetRequest.close": admin((c, u, raw) => {
+  "resetRequest.close": admin(async (c, u, raw) => {
     const p = z.object({ id: z.number() }).parse(raw);
-    closeResetRequest(c.sql, p.id);
+    await closeResetRequest(c.client, p.id);
     return ok("Заявка закрыта");
   }),
   /** Импорт студентов из CSV: «ФИО студента;Группа;ФИО родителя». Разделитель ; или , */

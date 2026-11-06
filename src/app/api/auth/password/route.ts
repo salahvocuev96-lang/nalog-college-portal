@@ -11,13 +11,14 @@ export async function POST(req: Request) {
   const body = await readJson(req);
   const current = String(body.current ?? "");
   const next = String(body.next ?? "").slice(0, 200);
-  const c = getContext();
-  const row = findUserById(c.sql, user.id)!;
+  const c = await getContext();
+  const row = await findUserById(c.client, user.id);
+  if (!row) return unauthorized();
   if (!verifyPassword(current, row.password_hash)) return json({ error: "Текущий пароль указан неверно" }, 400);
   const problem = passwordProblem(next);
   if (problem) return json({ error: problem }, 400);
   if (next === current) return json({ error: "Новый пароль должен отличаться от текущего" }, 400);
-  setPassword(c.sql, user.id, next);
+  await setPassword(c.client, user.id, next);
   audit(c, { actorId: user.id, actorRole: user.role, action: "auth.passwordChange", entity: "user", entityId: user.id, before: null, after: null, reason: null });
-  return json(sessionPayload({ ...user, mustChangePassword: false }));
+  return json(sessionPayload(c, { ...user, mustChangePassword: false }));
 }

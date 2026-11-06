@@ -1,52 +1,35 @@
-// Техническое обслуживание: состояние системы, резервные копии.
-// Технический администратор не получает права менять учебные данные.
+// Техническое обслуживание: состояние системы.
 import "server-only";
-import { existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
-import path from "node:path";
 import type { SessionUser } from "@/lib/types";
 import { audit, type Ctx } from "../repo";
-import { dbPath } from "../context";
 import { ok, requireRole, type Result } from "./common";
 
 const startedAt = Date.now();
-const backupDir = () => process.env.BACKUP_DIR ?? path.join(path.dirname(dbPath()), "backups");
 
-export function listBackups() {
-  const dir = backupDir();
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir)
-    .filter((f) => f.endsWith(".db"))
-    .map((f) => ({ file: f, size: statSync(path.join(dir, f)).size, at: statSync(path.join(dir, f)).mtimeMs }))
-    .sort((a, b) => b.at - a.at);
-}
-
-export function systemHealth(c: Ctx) {
-  const count = (t: string) => Number((c.sql.prepare(`SELECT COUNT(*) AS n FROM ${t}`).get() as { n: number }).n);
-  const file = dbPath();
-  const integrity = String((c.sql.prepare("PRAGMA quick_check").get() as Record<string, unknown>)?.quick_check ?? "unknown");
+export async function systemHealth(c: Ctx) {
+  const count = async (t: string) => {
+    const r = await c.client.execute({ sql: `SELECT COUNT(*) AS n FROM ${t}`, args: [] });
+    const val = (r.rows[0] as unknown as Record<string, unknown>)?.n;
+    return Number(typeof val === "bigint" ? val : val ?? 0);
+  };
+  const [users, sessions, groups, students, grades, audit_log, notifications] = await Promise.all([
+    count("users"), count("sessions"), count("groups"), count("students"),
+    count("grades"), count("audit_log"), count("notifications"),
+  ]);
   return {
-    status: integrity === "ok" ? "ok" : "degraded",
-    integrity,
+    status: "ok",
     node: process.version,
     uptimeSec: Math.round((Date.now() - startedAt) / 1000),
     memoryMb: Math.round(process.memoryUsage().rss / 1024 / 1024),
-    dbSizeKb: Math.round([file, `${file}-wal`].reduce((sum, f) => sum + (existsSync(f) ? statSync(f).size : 0), 0) / 1024),
-    migrations: (c.sql.prepare("SELECT version, applied_at FROM schema_migrations ORDER BY version").all() as { version: string; applied_at: number }[]).map((m) => ({ version: m.version, at: m.applied_at })),
-    tables: { users: count("users"), sessions: count("sessions"), groups: count("groups"), students: count("students"), grades: count("grades"), audit_log: count("audit_log"), notifications: count("notifications") },
-    backups: listBackups(),
+    tables: { users, sessions, groups, students, grades, audit_log, notifications },
     demoMode: process.env.DEMO_MODE !== "false",
   };
 }
 
-export const systemActions = {
+export const systemActions: Record<string, (c: Ctx, u: SessionUser, raw: unknown) => Result | Promise<Result>> = {
   "system.backup": (c: Ctx, u: SessionUser): Result => {
     requireRole(u, "tech_admin");
-    const dir = backupDir();
-    mkdirSync(dir, { recursive: true });
-    const name = `portal-${new Date().toISOString().replace(/[:.]/g, "-")}.db`;
-    // VACUUM INTO делает целостную копию работающей базы
-    c.sql.prepare("VACUUM INTO ?").run(path.join(dir, name));
-    audit(c, { actorId: u.id, actorRole: u.role, action: "system.backup", entity: "system", entityId: name, before: null, after: null, reason: null });
-    return ok(`Резервная копия создана: ${name}`);
+    audit(c, { actorId: u.id, actorRole: u.role, action: "system.backup", entity: "system", entityId: "turso", before: null, after: null, reason: null });
+    return ok("Данные хранятся в Turso — облачном SQLite. Экспорт через панель управления Turso: turso.tech");
   },
 };

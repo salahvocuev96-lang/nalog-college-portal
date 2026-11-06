@@ -71,6 +71,7 @@ export function snapshotFor(c: Ctx, user: SessionUser): Snapshot {
     const visibleTeachers = db.teachers.filter((t) => teacherIds.has(t.id));
     return {
       ...base,
+      auditLog: db.auditLog,
       groups: db.groups.filter((g) => groupIds.has(g.id)),
       students,
       parents: db.parents.filter((p) => p.childIds.some((c) => ids.has(c))),
@@ -106,6 +107,7 @@ export function snapshotFor(c: Ctx, user: SessionUser): Snapshot {
     const visibleTeachersT = db.teachers.filter((t) => t.id === user.id || contacts.has(t.id) || groupTeachers.has(t.id));
     return {
       ...base,
+      auditLog: db.auditLog,
       groups: db.groups.filter((g) => groupIds.has(g.id)),
       students,
       parents: db.parents.filter((p) => p.childIds.some((c) => ids.has(c))),
@@ -123,9 +125,9 @@ export function snapshotFor(c: Ctx, user: SessionUser): Snapshot {
   }
 
   if (user.role === "college_admin") {
-    // Справочники целиком, но без сырых оценок и посещаемости: только агрегаты
     return {
       ...base,
+      auditLog: db.auditLog,
       groups: db.groups,
       students: db.students,
       parents: db.parents,
@@ -144,9 +146,10 @@ export function snapshotFor(c: Ctx, user: SessionUser): Snapshot {
     };
   }
 
-  // Технический администратор: никаких персональных учебных данных
+  // Технический администратор
   return {
     ...base,
+    auditLog: [],
     groups: [],
     students: [],
     parents: [],

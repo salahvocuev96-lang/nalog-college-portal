@@ -7,5 +7,6 @@ export async function GET() {
   const user = await currentUser();
   if (!user) return unauthorized();
   if (user.role !== "tech_admin") return forbidden();
-  return json(systemHealth(getContext()));
+  const c = await getContext();
+  return json(await systemHealth(c));
 }

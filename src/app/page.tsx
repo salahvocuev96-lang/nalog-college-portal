@@ -7,8 +7,8 @@ import { getContext, isDemoMode } from "@/server/context";
 
 export const dynamic = "force-dynamic";
 
-export default function LoginPage() {
-  const { db } = getContext();
+export default async function LoginPage() {
+  const { db } = await getContext();
   const stats: [number, string][] = [
     [db.groups.length, "учебных групп"],
     [db.teachers.length, "преподавателей"],

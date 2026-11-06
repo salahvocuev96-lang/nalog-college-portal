@@ -11,17 +11,18 @@ export async function POST(req: Request) {
   if (!login || !password) return json({ error: "Введите логин и пароль" }, 400);
   const wait = loginBlocked(login);
   if (wait) return json({ error: `Слишком много попыток. Повторите через ${wait} с` }, 429);
-  const c = getContext();
-  const user = findUserByLogin(c.sql, login);
+  const c = await getContext();
+  const user = await findUserByLogin(c.client, login);
   if (!user || !verifyPassword(password, user.password_hash)) {
     registerFailure(login);
     return json({ error: "Неверный логин или пароль" }, 401);
   }
   if (!user.active) return json({ error: "Учётная запись заблокирована. Обратитесь в учебную часть" }, 403);
   clearFailures(login);
-  const token = createSession(c.sql, user.id);
+  const token = await createSession(c.client, user.id);
   audit(c, { actorId: user.id, actorRole: user.role, action: "auth.login", entity: "user", entityId: user.id, before: null, after: null, reason: null });
-  const res = json(sessionPayload(userFromToken(c.sql, c.db, token)!));
+  const sessionUser = await userFromToken(c.client, c.db, token);
+  const res = json(sessionPayload(c, sessionUser!));
   setSessionCookie(res, token, req);
   return res;
 }
