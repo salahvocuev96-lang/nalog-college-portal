@@ -70,11 +70,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-dvh lg:pl-[264px]">
       {/* Боковое меню для компьютера */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[264px] flex-col bg-nav text-white lg:flex">
-        <Link href="/home/" className="flex h-[68px] items-center gap-3 px-5">
-          <Crest className="size-10 shrink-0" />
+        <Link href="/home/" className="flex h-[76px] items-center gap-3.5 px-5">
+          <Crest className="size-12 shrink-0" />
           <div className="min-w-0 leading-tight">
-            <p className="truncate text-[14px] font-semibold">Налоговый колледж</p>
-            <p className="mt-0.5 text-[11px] font-medium text-gold-400">Электронный дневник</p>
+            <p className="truncate text-[15px] font-bold tracking-tight">Налоговый колледж</p>
+            <p className="mt-0.5 text-[12px] font-medium text-gold-400">Электронный дневник</p>
           </div>
         </Link>
         <nav className="flex-1 overflow-y-auto px-3 pb-3 pt-1 [scrollbar-color:rgb(255_255_255/0.15)_transparent] [scrollbar-width:thin]" aria-label="Основное меню">
