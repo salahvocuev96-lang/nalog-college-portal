@@ -293,9 +293,9 @@ export function avgTone(v: number | null) {
 /** Цвет полосы для среднего балла */
 export const avgBarTone = (v: number) => (v >= 4.5 ? "bg-blue-500" : v >= 3.5 ? "bg-emerald-500" : v >= 2.5 ? "bg-orange-400" : "bg-rose-500");
 
-export function GradeChip({ value, size = "md", title }: { value: number; size?: "sm" | "md"; title?: string }) {
+export function GradeChip({ value, size = "md", title }: { value: number; size?: "xs" | "sm" | "md"; title?: string }) {
   return (
-    <span title={title} className={cx("inline-grid shrink-0 place-items-center rounded-md font-bold tabular-nums shadow-[inset_0_-2px_0_rgb(0_0_0/0.12)]", gradeTone(value), size === "sm" ? "size-7 text-[13px]" : "size-9 text-base")}>
+    <span title={title} className={cx("inline-grid shrink-0 place-items-center rounded-md font-bold tabular-nums shadow-[inset_0_-2px_0_rgb(0_0_0/0.12)]", gradeTone(value), size === "xs" ? "size-6 text-[11px]" : size === "sm" ? "size-7 text-[13px]" : "size-9 text-base")}>
       {value}
     </span>
   );

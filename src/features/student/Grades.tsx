@@ -79,11 +79,11 @@ export function StudentGrades() {
                   <p className="text-sm font-semibold text-ink">{r.subject.name}</p>
                   <div className="mt-1.5 h-1 w-full max-w-40 overflow-hidden rounded-full bg-brand-50"><div className={cx("bar-x h-full rounded-full", r.avg === null ? "" : r.avg >= 4.5 ? "bg-blue-500" : r.avg >= 3.5 ? "bg-emerald-500" : r.avg >= 2.5 ? "bg-orange-400" : "bg-rose-500")} style={{ width: `${((r.avg ?? 0) / 5) * 100}%` }} /></div>
                 </div>
-                <div className="col-span-3 row-start-2 flex flex-wrap gap-1.5 md:col-span-1 md:row-start-auto">
+                <div className={cx("col-span-3 row-start-2 flex flex-wrap md:col-span-1 md:row-start-auto", r.list.length > 10 ? "gap-1" : "gap-1.5")}>
                   {r.list.length === 0 && <span className="text-xs text-muted">Нет оценок</span>}
                   {r.list.map((g) => (
                     <button key={g.date} onClick={() => setOpened(g)} className="relative transition-opacity hover:opacity-75">
-                      <GradeChip value={g.value} size="sm" title={formatShort(g.date)} />
+                      <GradeChip value={g.value} size={r.list.length > 10 ? "xs" : "sm"} title={formatShort(g.date)} />
                       {changed.has(key(g.studentId, g.subjectId, g.date)) && <span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-gold-500 ring-2 ring-white" />}
                     </button>
                   ))}
