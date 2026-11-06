@@ -53,9 +53,6 @@ export default function LoginPage() {
           </ul>
         </div>
 
-        <p className="relative text-[11px] text-white/35">
-          Демонстрационная версия. Студенты и&nbsp;родители вымышленные, расписание взято из&nbsp;проекта расписания колледжа
-        </p>
       </section>
 
       {/* Правая панель — форма входа */}
