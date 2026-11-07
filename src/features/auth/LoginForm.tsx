@@ -92,12 +92,6 @@ export function LoginForm({ demo }: { demo: boolean }) {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-xs text-muted">
-        Телефоны колледжа:{" "}
-        {COLLEGE.phones.map((p, i) => (
-          <span key={p}>{i > 0 && ", "}<a href={`tel:${p.replace(/[^\d+]/g, "")}`} className="whitespace-nowrap font-medium text-brand-700 hover:text-brand-900">{p}</a></span>
-        ))}
-      </p>
 
       {demo && (
         <div className="mt-8 rounded-xl border border-line bg-white p-4 lg:bg-subtle">
@@ -119,7 +113,6 @@ export function LoginForm({ demo }: { demo: boolean }) {
               </button>
             ))}
           </div>
-          <p className="mt-3 text-xs text-muted">Вход с паролем: <code className="rounded bg-white px-1">teacher</code> / <code className="rounded bg-white px-1">demo2026</code>. Первый вход с временным паролем: <code className="rounded bg-white px-1">newstudent</code> / <code className="rounded bg-white px-1">temp-2026</code></p>
         </div>
       )}
 
