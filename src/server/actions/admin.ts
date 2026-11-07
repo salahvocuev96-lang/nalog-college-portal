@@ -244,6 +244,28 @@ export const adminActions = {
     log(c, u, p.active ? "account.unblock" : "account.block", "user", p.id, { active: p.active });
     return ok(p.active ? "Доступ восстановлен" : "Доступ заблокирован");
   }),
+  "account.createAllTeachers": admin(async (c, u) => {
+    const existing = await c.client.execute("SELECT id FROM users");
+    const existingIds = new Set(existing.rows.map((r) => r[0] as string));
+    const teachers = c.db.teachers.filter((t) => !existingIds.has(t.id));
+    if (teachers.length === 0) return ok("У всех преподавателей уже есть аккаунты");
+    const results: { name: string; login: string; tempPassword: string }[] = [];
+    for (const t of teachers) {
+      const parts = t.name.split(/\s+/);
+      const surname = translit(parts[0] ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const initials = (parts[1]?.[0] ?? "") + (parts[2]?.[0] ?? "");
+      const base = `${surname}.${translit(initials).toLowerCase().replace(/[^a-z0-9]/g, "")}`;
+      let login = base;
+      let n = 2;
+      while (results.some((r) => r.login === login) || await c.client.execute({ sql: "SELECT 1 FROM users WHERE login=?", args: [login] }).then((r) => r.rows.length > 0)) {
+        login = `${base}${n++}`;
+      }
+      const temp = await createAccount(c.client, t.id, login, "teacher");
+      log(c, u, "account.create", "user", t.id, { login, role: "teacher" });
+      results.push({ name: t.name, login, tempPassword: temp });
+    }
+    return ok(`Создано аккаунтов: ${results.length}`, { created: results });
+  }),
   "resetRequest.close": admin(async (c, u, raw) => {
     const p = z.object({ id: z.number() }).parse(raw);
     await closeResetRequest(c.client, p.id);

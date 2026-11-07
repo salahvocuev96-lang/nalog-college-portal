@@ -17,6 +17,7 @@ export function AdminAccounts() {
   const [q, setQ] = useState("");
   const [issued, setIssued] = useState<{ login: string; tempPassword: string } | null>(null);
   const [create, setCreate] = useState(false);
+  const [bulkResult, setBulkResult] = useState<{ name: string; login: string; tempPassword: string }[] | null>(null);
   const confirm = useConfirm();
   const load = useCallback(async () => setData(await fetchJson("/api/accounts")), []);
   useEffect(() => {
@@ -42,7 +43,7 @@ export function AdminAccounts() {
   return (
     <div>
       <PageHeader title="Аккаунты" subtitle="Учётные записи создаёт только учебная часть. Пользователь меняет временный пароль при первом входе"
-        action={<Button variant="brand" onClick={() => setCreate(true)}><Icon name="plus" className="size-4" />Выдать доступ</Button>} />
+        action={<span className="flex gap-2"><Button variant="outline" onClick={async () => { const r = await run("account.createAllTeachers", {}); if (r.ok && r.data) setBulkResult((r.data as { created: { name: string; login: string; tempPassword: string }[] }).created); }}><Icon name="users" className="size-4" />Аккаунты всем преподавателям</Button><Button variant="brand" onClick={() => setCreate(true)}><Icon name="plus" className="size-4" />Выдать доступ</Button></span>} />
       {open.length > 0 && (
         <Card className="mb-6 border-gold-500/50">
           <CardHeader icon="key" title={`Заявки на восстановление пароля · ${open.length}`} />
@@ -96,6 +97,19 @@ export function AdminAccounts() {
       </Modal>
       {confirm.node}
       {db.students.length === 0 && <Empty title="Нет данных" />}
+      <Modal open={!!bulkResult} onClose={() => setBulkResult(null)} title={`Создано аккаунтов: ${bulkResult?.length ?? 0}`} footer={<><Button variant="outline" onClick={() => { const text = (bulkResult ?? []).map((r) => `${r.name}: ${r.login} / ${r.tempPassword}`).join("\n"); navigator.clipboard?.writeText(text).then(() => toastResult({ ok: true, info: "Скопировано" })); }}>Скопировать всё</Button><Button onClick={() => setBulkResult(null)}>Готово</Button></>}>
+        {bulkResult && bulkResult.length > 0 ? (
+          <div className="max-h-96 overflow-y-auto space-y-2">
+            <p className="text-sm text-muted mb-3">Передайте каждому преподавателю его логин и пароль. При первом входе пароль нужно сменить.</p>
+            {bulkResult.map((r) => (
+              <div key={r.login} className="rounded-lg bg-brand-900 px-4 py-2 font-mono text-white text-sm">
+                <p className="text-white/50 text-xs">{r.name}</p>
+                <p>{r.login} <span className="text-gold-400">/ {r.tempPassword}</span></p>
+              </div>
+            ))}
+          </div>
+        ) : <p className="text-sm text-muted">У всех преподавателей уже есть аккаунты.</p>}
+      </Modal>
     </div>
   );
 }
