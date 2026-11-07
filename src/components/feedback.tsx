@@ -67,7 +67,8 @@ export function Modal({ open, onClose, title, children, footer, wide }: { open: 
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
-    ref.current?.querySelector<HTMLElement>("input, select, textarea, button")?.focus();
+    const el = ref.current;
+    (el?.querySelector<HTMLElement>("input:not([type=hidden]), textarea, select") ?? el?.querySelector<HTMLElement>("button:not([aria-label='Закрыть'])")  )?.focus();
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
