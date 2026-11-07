@@ -80,7 +80,6 @@ export function AdminAccounts() {
           ) },
         ]} />
       </Card>
-      <p className="mt-3 text-xs text-muted">В демо-версии аккаунты есть не у всех студентов: выдайте доступ любому человеку кнопкой «Выдать доступ».</p>
 
       {create && <CreateAccount existing={new Set(data.accounts.map((a) => a.id))} onClose={() => setCreate(false)} onCreate={(personId, login) => run("account.create", { personId, login }).then((r) => r.ok && setCreate(false))} />}
       <Modal open={!!issued} onClose={() => setIssued(null)} title="Временный пароль выдан" footer={<Button onClick={() => setIssued(null)}>Готово</Button>}>
