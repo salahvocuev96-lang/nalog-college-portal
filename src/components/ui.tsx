@@ -275,8 +275,8 @@ export function MeterRow({ label, value, max, display, tone }: { label: string; 
 /** Цвет оценки и среднего балла */
 export function gradeTone(v: number | null) {
   if (v === null) return "bg-slate-100 text-slate-400 ring-slate-200";
-  if (v >= 4.5) return "bg-blue-500 text-white ring-blue-300";
-  if (v >= 3.5) return "bg-emerald-500 text-white ring-emerald-300";
+  if (v >= 4.5) return "bg-emerald-500 text-white ring-emerald-300";
+  if (v >= 3.5) return "bg-blue-500 text-white ring-blue-300";
   if (v >= 2.5) return "bg-orange-400 text-white ring-orange-200";
   return "bg-rose-500 text-white ring-rose-300";
 }
@@ -284,14 +284,14 @@ export function gradeTone(v: number | null) {
 /** Мягкий цвет среднего балла: в таблицах не должен спорить с самими оценками */
 export function avgTone(v: number | null) {
   if (v === null) return "bg-slate-100 text-slate-400 ring-slate-200";
-  if (v >= 4.5) return "bg-blue-50 text-blue-700 ring-blue-100";
-  if (v >= 3.5) return "bg-emerald-50 text-emerald-700 ring-emerald-100";
+  if (v >= 4.5) return "bg-emerald-50 text-emerald-700 ring-emerald-100";
+  if (v >= 3.5) return "bg-blue-50 text-blue-700 ring-blue-100";
   if (v >= 2.5) return "bg-orange-50 text-orange-700 ring-orange-100";
   return "bg-rose-50 text-rose-700 ring-rose-100";
 }
 
 /** Цвет полосы для среднего балла */
-export const avgBarTone = (v: number) => (v >= 4.5 ? "bg-blue-500" : v >= 3.5 ? "bg-emerald-500" : v >= 2.5 ? "bg-orange-400" : "bg-rose-500");
+export const avgBarTone = (v: number) => (v >= 4.5 ? "bg-emerald-500" : v >= 3.5 ? "bg-blue-500" : v >= 2.5 ? "bg-orange-400" : "bg-rose-500");
 
 export function GradeChip({ value, size = "md", title }: { value: number; size?: "xs" | "sm" | "md"; title?: string }) {
   return (
