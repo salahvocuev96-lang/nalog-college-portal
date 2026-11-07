@@ -245,25 +245,32 @@ export const adminActions = {
     return ok(p.active ? "Доступ восстановлен" : "Доступ заблокирован");
   }),
   "account.createAllTeachers": admin(async (c, u) => {
-    const existing = await c.client.execute("SELECT id FROM users");
-    const existingIds = new Set(existing.rows.map((r) => r[0] as string));
+    const [existingRes, loginsRes] = await Promise.all([
+      c.client.execute("SELECT id FROM users"),
+      c.client.execute("SELECT login FROM users"),
+    ]);
+    const existingIds = new Set(existingRes.rows.map((r) => r[0] as string));
+    const usedLogins = new Set(loginsRes.rows.map((r) => r[0] as string));
     const teachers = c.db.teachers.filter((t) => !existingIds.has(t.id));
     if (teachers.length === 0) return ok("У всех преподавателей уже есть аккаунты");
+    const { hashPassword } = await import("../auth");
     const results: { name: string; login: string; tempPassword: string }[] = [];
+    const stmts: { sql: string; args: (string | number)[] }[] = [];
     for (const t of teachers) {
       const parts = t.name.split(/\s+/);
       const surname = translit(parts[0] ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
       const initials = (parts[1]?.[0] ?? "") + (parts[2]?.[0] ?? "");
       const base = `${surname}.${translit(initials).toLowerCase().replace(/[^a-z0-9]/g, "")}`;
-      let login = base;
-      let n = 2;
-      while (results.some((r) => r.login === login) || await c.client.execute({ sql: "SELECT 1 FROM users WHERE login=?", args: [login] }).then((r) => r.rows.length > 0)) {
-        login = `${base}${n++}`;
-      }
-      const temp = await createAccount(c.client, t.id, login, "teacher");
-      log(c, u, "account.create", "user", t.id, { login, role: "teacher" });
+      let login = base; let n = 2;
+      while (usedLogins.has(login)) login = `${base}${n++}`;
+      usedLogins.add(login);
+      const { randomBytes } = await import("node:crypto");
+      const temp = randomBytes(4).toString("hex");
+      stmts.push({ sql: "INSERT INTO users (id, login, password_hash, role, must_change_password, active, created_at) VALUES (?, ?, ?, 'teacher', 1, 1, ?)", args: [t.id, login, hashPassword(temp), Date.now()] });
       results.push({ name: t.name, login, tempPassword: temp });
     }
+    await c.client.batch(stmts as Parameters<typeof c.client.batch>[0], "write");
+    for (const r of results) log(c, u, "account.create", "user", r.login, { login: r.login, role: "teacher" });
     return ok(`Создано аккаунтов: ${results.length}`, { created: results });
   }),
   "resetRequest.close": admin(async (c, u, raw) => {
